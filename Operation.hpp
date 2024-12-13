@@ -1,6 +1,6 @@
 #include <Core/Core.h>
 
-#define LAYOUTFILE <EasyDriller/OperationTab.lay>
+#define LAYOUTFILE <EasyCncCAM/OperationTab.lay>
 #include <CtrlCore/lay.h>
 
 using namespace Upp;
@@ -11,7 +11,7 @@ class Operation : public Moveable<Operation> {
 protected:
 	ImageDraw *draw = NULL;
 	static double scale;
-	Pointf shiftDraw;
+	Pointf shiftDraw = {0., 0.};
 public:
 	virtual ~Operation() {
 		if (draw) delete draw;

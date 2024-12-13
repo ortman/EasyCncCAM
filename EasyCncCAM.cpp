@@ -96,6 +96,19 @@ EasyCncCAM::EasyCncCAM() {
 	};
 }
 
+EasyCncCAM::~EasyCncCAM() {
+	viewer.setOperations(NULL);
+	operationArrayTab.setOperation(NULL);
+	operationRoundlessTab.setOperation(NULL);
+	operationMillingTab.setOperation(NULL);
+	currentOperation = NULL;
+	int cnt = operations.GetCount();
+	for (int i=cnt-1; i>=0; --i) {
+		if (operations[i] != NULL) delete operations[i];
+		//operations.Remove(i);
+	}
+}
+
 int EasyCncCAM::FindOperation(Operation *op) {
 	int cnt = operations.GetCount();
 	for (int i=0; i<cnt; ++i) {
@@ -109,6 +122,7 @@ void EasyCncCAM::updateOperationTab() {
 		case 0: {
 			OperationDrill *op = operationArrayTab.setOperation(currentOperation);
 			if (op) { // transform operation
+				op->setDrawDrillCenter(oShowDrillCenters);
 				int idx = FindOperation(currentOperation);
 				if (idx >= 0) {
 					operations[idx] = op;
@@ -124,6 +138,7 @@ void EasyCncCAM::updateOperationTab() {
 		case 1: {
 			OperationDrill *op = operationRoundlessTab.setOperation(currentOperation);
 			if (op) { // transform operation
+				op->setDrawDrillCenter(oShowDrillCenters);
 				int idx = FindOperation(currentOperation);
 				if (idx >= 0) {
 					operations[idx] = op;
@@ -161,11 +176,10 @@ void EasyCncCAM::OperationListDisplay::Paint(Draw& w, const Rect& r, const Value
 	if (op != NULL) {
 		String s = op->ToString();
 		int tcy = GetTextSize(s, StdFont()).cy;
-	    //int c = r.Deflated(1).GetSize().cy;
+	    int c = r.Deflated(1).GetSize().cy;
 	    int c = 0;
 		w.DrawText(r.left + c + 3, r.top+(r.GetHeight() - tcy) / 2, s, StdFont(), ink);
 	}
-
 }
 
 GUI_APP_MAIN {
