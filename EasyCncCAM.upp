@@ -1,0 +1,18 @@
+description "Easy CNC CAM\377";
+
+uses
+	CtrlLib;
+
+file
+	EasyCncCAM.h,
+	OperationTab.lay,
+	Operation.hpp,
+	Translation.t,
+	EasyCncCAM.cpp,
+	ViewerCAM.hpp,
+	EasyCncCAM.lay,
+	EasyCncCAM.iml;
+
+mainconfig
+	"" = "GUI";
+

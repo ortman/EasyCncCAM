@@ -1,0 +1,11 @@
+LAYOUT(EasyCncCAMLayout, 920, 588)
+	ITEM(Upp::Button, bGenerate, SetLabel(t_("Generate CAM")).SetFont(Upp::StdFontZ(15)).LeftPosZ(288, 168).TopPosZ(8, 32))
+	ITEM(Upp::Button, bShowAll, SetLabel(t_("Show all view")).RightPosZ(4, 120).TopPosZ(8, 32))
+	ITEM(ViewerCAM, viewer, HSizePosZ(288, 4).VSizePosZ(44, 4))
+	ITEM(Upp::ColumnList, clOperations, LeftPosZ(8, 272).VSizePosZ(44, 276))
+	ITEM(Upp::Button, bAddOperation, SetLabel(t_("Add operation")).LeftPosZ(8, 132).TopPosZ(8, 32))
+	ITEM(Upp::Button, bRemoveOperation, SetLabel(t_("Remove selected")).LeftPosZ(148, 132).TopPosZ(8, 32))
+	ITEM(Upp::TabCtrl, tOperationSettings, LeftPosZ(8, 276).BottomPosZ(8, 264))
+	ITEM(Upp::Option, oShowCoordinates, SetLabel(t_("Show coordinate axis")).RightPosZ(128, 164).TopPosZ(8, 32))
+	ITEM(Upp::Option, oShowDrillCenters, SetLabel(t_("Show drill centers")).RightPosZ(296, 164).TopPosZ(8, 32))
+END_LAYOUT
