@@ -9,6 +9,7 @@ EasyCncCAM::EasyCncCAM() {
 			bar.Add(t_("Generate CAM"), [=] {
 			});
 			bar.Add(t_("Tool editor"), [=] {
+				toolEditor.Run();
 			});
 		});
 		bar.Sub(t_("View"), [=](Bar &bar) {
@@ -182,7 +183,6 @@ void EasyCncCAM::OperationListDisplay::Paint(Draw& w, const Rect& r, const Value
 	    int c = 0;
 		w.DrawText(r.left + c + 3, r.top+(r.GetHeight() - tcy) / 2, s, StdFont(), ink);
 	}
-
 }
 
 GUI_APP_MAIN {

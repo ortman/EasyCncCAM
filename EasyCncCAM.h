@@ -7,13 +7,15 @@ using namespace Upp;
 
 #include "ViewerCAM.hpp"
 #include "Resource.h"
+#include "ToolEditor.hpp"
 
 class EasyCncCAM : public WithEasyCncCAMLayout<TopWindow> {
-	MenuBar menu;
 	struct OperationListDisplay : public Display {
 		virtual void Paint(Draw& w, const Rect& r, const Value& q, Color ink, Color paper, dword style) const;
 	};
 private:
+	MenuBar menu;
+	ToolEditor toolEditor;
 	FileSel sel;
 	OperationListDisplay operationListDisplay;
 	Operation *currentOperation = new OperationDrillArray();

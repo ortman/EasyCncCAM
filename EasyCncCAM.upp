@@ -4,6 +4,7 @@ uses
 	CtrlLib;
 
 file
+	Tool.hpp,
 	Resource.h,
 	EasyCncCAM.h,
 	OperationTab.lay,
