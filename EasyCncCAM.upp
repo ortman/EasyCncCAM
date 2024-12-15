@@ -9,6 +9,7 @@ file
 	Operation.hpp,
 	Translation.t,
 	EasyCncCAM.cpp,
+	GCodeGenerator.hpp,
 	ViewerCAM.hpp,
 	EasyCncCAM.lay,
 	EasyCncCAM.iml;
