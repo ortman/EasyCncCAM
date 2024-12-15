@@ -6,14 +6,10 @@
 using namespace Upp;
 
 #include "ViewerCAM.hpp"
-
-#define LAYOUTFILE <EasyCncCAM/EasyCncCAM.lay>
-#include <CtrlCore/lay.h>
-
-#define IMAGEFILE <EasyCncCAM/EasyCncCAM.iml>
-#include <Draw/iml_header.h>
+#include "Resource.h"
 
 class EasyCncCAM : public WithEasyCncCAMLayout<TopWindow> {
+	MenuBar menu;
 	struct OperationListDisplay : public Display {
 		virtual void Paint(Draw& w, const Rect& r, const Value& q, Color ink, Color paper, dword style) const;
 	};

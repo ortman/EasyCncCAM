@@ -4,12 +4,14 @@ uses
 	CtrlLib;
 
 file
+	Resource.h,
 	EasyCncCAM.h,
 	OperationTab.lay,
 	Operation.hpp,
 	Translation.t,
 	EasyCncCAM.cpp,
 	ViewerCAM.hpp,
+	ToolEditor.hpp,
 	EasyCncCAM.lay,
 	EasyCncCAM.iml;
 

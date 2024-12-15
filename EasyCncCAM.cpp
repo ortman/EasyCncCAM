@@ -1,11 +1,28 @@
 #include "EasyCncCAM.h"
 
-#define TFILE <EasyCncCAM/Translation.t>
-#include <Core/t.h>
-
 EasyCncCAM::EasyCncCAM() {
 	CtrlLayout(*this, "Easy CNC CAM");
 	Sizeable().Zoomable();
+	AddFrame(menu);
+	menu.Set([=](Bar &bar) {
+		bar.Sub(t_("File"), [=](Bar &bar) {
+			bar.Add(t_("Generate CAM"), [=] {
+			});
+			bar.Add(t_("Tool editor"), [=] {
+			});
+		});
+		bar.Sub(t_("View"), [=](Bar &bar) {
+			bar.Add(t_("Show drill centers"), [=] {
+				oShowDrillCenters = !oShowDrillCenters;
+				oShowDrillCenters.Action();
+			});
+			bar.Add(t_("Show coordinate axis"), [=] {
+				oShowCoordinates = !oShowCoordinates;
+				oShowCoordinates.Action();
+			});
+		});
+	});
+	
 	bGenerate.SetStyle(Button::StyleOk());
 	oShowCoordinates <<= true;
 	oShowDrillCenters <<= false;
