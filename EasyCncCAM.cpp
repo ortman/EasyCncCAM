@@ -176,7 +176,7 @@ void EasyCncCAM::OperationListDisplay::Paint(Draw& w, const Rect& r, const Value
 	if (op != NULL) {
 		String s = op->ToString();
 		int tcy = GetTextSize(s, StdFont()).cy;
-	    int c = r.Deflated(1).GetSize().cy;
+	    //int c = r.Deflated(1).GetSize().cy;
 	    int c = 0;
 		w.DrawText(r.left + c + 3, r.top+(r.GetHeight() - tcy) / 2, s, StdFont(), ink);
 	}

@@ -228,10 +228,16 @@ private:
 	double radius;
 	int count;
 	double startAngle;
+	double sector;
 	
 	void calculateDrills() {
 		drills.clear();
-		double shiftAngle = M_2PI / count;
+		double shiftAngle;
+		if (sector < 360. && count > 1) {
+			shiftAngle = M_2PI * sector / 360. / (count- 1);
+		} else {
+			shiftAngle = M_2PI / count;
+		}
 		for (int i=0; i<count; ++i) {
 			drills.Add({
 				center.x + radius * cos(startAngle * M_PI/180 + shiftAngle*i),
@@ -246,6 +252,7 @@ public:
 		radius = 50.;
 		count = 6;
 		startAngle = 0.;
+		sector = 360.;
 		calculateDrills();
 	}
 	
@@ -253,11 +260,12 @@ public:
 		radius = 50.;
 		count = 6;
 		startAngle = 0.;
+		sector = 360.;
 		calculateDrills();
 	}
 	
-	OperationDrillRoundless(Pointf center, double radius, int count, double startAngle) {
-		setRoundless(center, radius, count, startAngle);
+	OperationDrillRoundless(Pointf center, double radius, int count, double startAngle, double sector) {
+		setRoundless(center, radius, count, startAngle, sector);
 	};
 	
 	double getRadius() {return radius;}
@@ -278,12 +286,19 @@ public:
 		calculateDrills();
 	}
 	
-	void setRoundless(Pointf center, double radius, int count, double startAngle) {
+	double getSector() {return sector;}
+	void setSector(const double s) {
+		sector = s;
+		calculateDrills();
+	}
+	
+	void setRoundless(Pointf center, double radius, int count, double startAngle, double sector) {
 		if (radius <= 0. || count <= 0) return;
 		this->center = center;
 		this->radius = radius;
 		this->count = count;
 		this->startAngle = startAngle;
+		this->sector = sector;
 		calculateDrills();
 	}
 	
@@ -483,6 +498,12 @@ public:
 			}
 			Action();
 		};
+		eSector.WhenAction = [=] {
+			if (operation) {
+				operation->setSector(eSector);
+			}
+			Action();
+		};
 	}
 	OperationDrillRoundless* setOperation(Operation *operation) {
 		if (operation == NULL) {
@@ -494,6 +515,7 @@ public:
 			eRadius.Clear();
 			eCount.Clear();
 			eStartAngle.Clear();
+			eSector.Clear();
 			return NULL;
 		}
 		OperationDrillRoundless *drRoundless = dynamic_cast<OperationDrillRoundless*>(operation);
@@ -509,6 +531,7 @@ public:
 		eRadius <<= drRoundless->getRadius();
 		eCount <<= drRoundless->getCount();
 		eStartAngle <<= drRoundless->getStartAngle();
+		eSector <<= drRoundless->getSector();
 		
 		return isCreateNew ? drRoundless : NULL;
 	}
