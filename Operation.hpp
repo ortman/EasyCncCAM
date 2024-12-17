@@ -53,7 +53,7 @@ protected:
 
 		double diameter = (drill + 1) * scale;
 		double radius = diameter / 2;
-		int pen = (int)(1 * scale);
+		int pen = 1;
 		int x,y;
 		for (Pointf pd : drills) {
 			x = (int)((pd.x - shiftDraw.x) * scale - radius);
