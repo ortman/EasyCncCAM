@@ -27,6 +27,7 @@ private:
 	void updateOperationTab();
 public:
 	EasyCncCAM();
+	~EasyCncCAM();
 };
 
 #endif

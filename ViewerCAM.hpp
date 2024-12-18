@@ -3,6 +3,9 @@
 
 using namespace Upp;
 
+#define MIN_SCALE 0.2
+#define MAX_SCALE 6.0
+
 class ViewerCAM : public Ctrl {
 private:
 	Size coordSize = {100, 100};
@@ -65,10 +68,10 @@ public:
 	
 	void MouseWheel(Point p, int zdelta, dword keyflags) {
 		if (zdelta > 0) {
-			if (scale > 6.) return;
+			if (scale > MAX_SCALE) return;
 			scale *= 1.2;
 		} else {
-			if (scale < 0.2) return;
+			if (scale < MIN_SCALE) return;
 			scale /= 1.2;
 		}
 		
@@ -128,6 +131,8 @@ public:
 			double scaleX = viewSize.cx / operationsRect.GetSize().cx;
 			double scaleY = viewSize.cy / operationsRect.GetSize().cy;
 			scale = min(scaleX, scaleY);
+			if (scale > MAX_SCALE) scale = MAX_SCALE;
+			else if (scale < MIN_SCALE) scale = MIN_SCALE;
 		} else {
 			scale = 1.;
 		}
