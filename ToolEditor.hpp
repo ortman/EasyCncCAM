@@ -1,5 +1,6 @@
 #include "Resource.h"
 #include "Tool.hpp"
+#include "Settings.hpp"
 
 class ToolEditor : public WithToolEditorLayout<TopWindow> {
 private:
@@ -28,12 +29,12 @@ public:
 			clTools.SetCursor(clTools.GetCount()-1);
 		};
 		
-		dlType.Add(Tool::Drill, Tool::typeToString(Tool::Drill));
-		dlType.Add(Tool::Mill, Tool::typeToString(Tool::Mill));
+		dlType.Add(Tool::Drill, Tool::typeToString(Tool::Drill, true));
+		dlType.Add(Tool::Mill, Tool::typeToString(Tool::Mill, true));
 		
 		dlSearchType.Add(0, t_("Any"));
-		dlSearchType.Add(Tool::Drill, Tool::typeToString(Tool::Drill));
-		dlSearchType.Add(Tool::Mill, Tool::typeToString(Tool::Mill));
+		dlSearchType.Add(Tool::Drill, Tool::typeToString(Tool::Drill, true));
+		dlSearchType.Add(Tool::Mill, Tool::typeToString(Tool::Mill, true));
 		dlSearchType = 0;
 		
 		clTools.SetDisplay(toolListDisplay);
@@ -72,5 +73,31 @@ public:
 			}
 			clTools.Refresh();
 		};
+		
+		bOk.WhenPush = [=] {
+			Settings::Save();
+			Close();
+		};
+		
+		bCancel.WhenPush = [=] {
+			Close();
+		};
+	}
+
+	~ToolEditor() {
+		selectedTool = NULL;
+		for (Tool *t : Tool::tools) {
+			delete t;
+		}
+		Tool::tools.clear();
+	}
+	
+	int Run(bool appmodal = false) {
+		clTools.Clear();
+		for (Tool *t : Tool::tools) {
+			clTools.Add((int64)t);
+		}
+		if (clTools.GetCount() > 0) clTools.SetCursor(0);
+		return TopWindow::Run(appmodal);
 	}
 };

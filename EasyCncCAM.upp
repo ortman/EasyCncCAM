@@ -12,6 +12,7 @@ file
 	Translation.t,
 	EasyCncCAM.cpp,
 	ViewerCAM.hpp,
+	Settings.hpp,
 	ToolEditor.hpp,
 	EasyCncCAM.lay,
 	EasyCncCAM.iml;

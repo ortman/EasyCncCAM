@@ -201,6 +201,8 @@ void EasyCncCAM::OperationListDisplay::Paint(Draw& w, const Rect& r, const Value
 }
 
 GUI_APP_MAIN {
+	StdLogSetup(LOG_COUT|LOG_FILE);
+	Settings::Load();
 	int lang = GetSystemLNG();
 	lang = SetLNGCharset(lang, CHARSET_UTF8);
 	SetLanguage(lang);
