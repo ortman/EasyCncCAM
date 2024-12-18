@@ -2,6 +2,7 @@
 
 #define LAYOUTFILE <EasyCncCAM/OperationTab.lay>
 #include <CtrlCore/lay.h>
+#include "Tool.hpp"
 
 using namespace Upp;
 
@@ -12,6 +13,7 @@ protected:
 	ImageDraw *draw = NULL;
 	static double scale;
 	Pointf shiftDraw = {0., 0.};
+	Tool tool;
 public:
 	virtual ~Operation() {
 		if (draw) delete draw;
@@ -28,15 +30,19 @@ public:
 	}
 	virtual void calculateDraw() {
 	}
+	Tool& getTool() {
+		return tool;
+	}
+	void setTool(const Tool& tool) {
+		this->tool = tool;
+	}
 };
 
 double Operation::scale = OPERATION_SCALE;
 
-//class OperationMilling;
 class OperationDrill : public Operation {
 protected:
 	Vector<Pointf> drills;
-	double drill = 10.;
 	double depth = 0.1;
 	Pointf center = {0., -0.};
 	bool isDrawDrillCenter = false;
@@ -51,7 +57,7 @@ protected:
 		if (draw == NULL) return;
 		draw->Alpha().DrawRect({0, 0, (int)(imgSize.cx), (int)(imgSize.cy)}, GrayColor(0));
 
-		double diameter = (drill + 1) * scale;
+		double diameter = (tool.diameter + 1) * scale;
 		double radius = diameter / 2;
 		int pen = 1;
 		int x,y;
@@ -94,7 +100,7 @@ public:
 	OperationDrill(Operation* operation) {
 		OperationDrill *dr = dynamic_cast<OperationDrill*>(operation);
 		if (dr) {
-			drill = dr->drill;
+			tool = dr->tool;
 			depth = dr->depth;
 			center = dr->center;
 			isDrawDrillCenter = dr->isDrawDrillCenter;
@@ -117,14 +123,7 @@ public:
 	}
 	
 	Vector<Pointf>& getDrills() {return drills;}
-	
-	double getDrill() {return drill;}
-	
-	void setDrill(double d) {
-		drill = d;
-		calculateDraw();
-	}
-	
+		
 	double getDepth() {return depth;}
 	
 	void setDepth(double d) {depth = d;}
@@ -136,13 +135,9 @@ public:
 		isDrawDrillCenter = b;
 		calculateDraw();
 	}
-	
-//	virtual Sizef getDrawSize() {
-//		return {1., 1.};
-//	}
-	
+		
 	virtual String ToString() {
-		return String(t_("Drill(")) + DblStr(drill) + "x" + DblStr(depth) + ")";
+		return String(t_("Drill(")) + DblStr(tool.diameter) + "x" + DblStr(depth) + ")";
 	}
 	
 };
@@ -215,11 +210,11 @@ public:
 	}
 	
 	Sizef getDrawSize() {
-		return {size.cx + drill + 7., size.cy + drill + 7.};
+		return {size.cx + tool.diameter + 7., size.cy + tool.diameter + 7.};
 	}
 	
 	virtual String ToString() {
-		return String(t_("DrillArray(")) + DblStr(drill) + " x " + DblStr(depth) + t_(") Array: ") + count.ToString();
+		return String(t_("DrillArray(")) + DblStr(tool.diameter) + " x " + DblStr(depth) + t_(") Array: ") + count.ToString();
 	}
 };
 
@@ -303,43 +298,36 @@ public:
 	}
 	
 	Sizef getDrawSize() {
-		double width = radius * 2. + drill + 7.;
+		double width = radius * 2. + tool.diameter + 7.;
 		return {width, width};
 	}
 	
 	virtual String ToString() {
-		return String(t_("DrillRoundless(")) + DblStr(drill) + " x " + DblStr(depth) + t_(") Radius: ") + DblStr(radius) + ", Count: " + IntStr(count);
+		return String(t_("DrillRoundless(")) + DblStr(tool.diameter) + " x " + DblStr(depth) + t_(") Radius: ") + DblStr(radius) + ", Count: " + IntStr(count);
 	}
 };
 
 class OperationMilling : public Operation {
 private:
-	double tool;
 	double depth;
 	
 	void calculateMilling() {
 	}
 public:
 	OperationMilling() {
-		OperationMilling(8, 0.1);
+		Tool tool;
+		OperationMilling(tool, 0.1);
 	}
 	OperationMilling(Operation *operation) {
 		OperationDrill *dr = dynamic_cast<OperationDrill*>(operation);
 		if (dr) {
-			tool = dr->getDrill();
+			tool = dr->getTool();
 			depth = dr->getDepth();
 		}
 	}
-	OperationMilling(double tool, double depth) {
+	OperationMilling(Tool &tool, double depth) {
 		this->tool = tool;
 		this->depth = depth;
-	}
-	
-	double getTool() {return tool;}
-	
-	void setTool(double diameter) {
-		tool = diameter;
-		calculateMilling();
 	}
 	
 	double getDepth() {return depth;}
@@ -361,9 +349,9 @@ private:
 public:
 	OperationArrayTab() {
 		CtrlLayout(*this);
-		eDrill.WhenAction = [=] {
+		dlTool.WhenAction = [=] {
 			if (operation) {
-				operation->setDrill(eDrill);
+				operation->setTool(dlTool.GetValue());
 			}
 			Action();
 		};
@@ -419,7 +407,7 @@ public:
 	OperationDrillArray* setOperation(Operation *operation) {
 		if (operation == NULL) {
 			this->operation = NULL;
-			eDrill.Clear();
+			dlTool = -1;
 			eDepth.Clear();
 			eCenterShiftX.Clear();
 			eCenterShiftY.Clear();
@@ -435,7 +423,7 @@ public:
 			drArray = new OperationDrillArray(operation);
 		}
 		this->operation = drArray;
-		eDrill <<= drArray->getDrill();
+		dlTool <<= drArray->getTool();
 		eDepth <<= drArray->getDepth();
 		eCenterShiftX <<= drArray->getCenter().x;
 		eCenterShiftY <<= drArray->getCenter().y;
@@ -454,9 +442,9 @@ private:
 public:
 	OperationRoundlessTab() {
 		CtrlLayout(*this);
-		eDrill.WhenAction = [=] {
+		dlTool.WhenAction = [=] {
 			if (operation) {
-				operation->setDrill(eDrill);
+				operation->setTool(dlTool.GetValue());
 			}
 			Action();
 		};
@@ -508,7 +496,7 @@ public:
 	OperationDrillRoundless* setOperation(Operation *operation) {
 		if (operation == NULL) {
 			this->operation = NULL;
-			eDrill.Clear();
+			dlTool = -1;
 			eDepth.Clear();
 			eCenterShiftX.Clear();
 			eCenterShiftY.Clear();
@@ -524,7 +512,7 @@ public:
 			drRoundless = new OperationDrillRoundless(operation);
 		}
 		this->operation = drRoundless;
-		eDrill <<= drRoundless->getDrill();
+		dlTool <<= drRoundless->getTool();
 		eDepth <<= drRoundless->getDepth();
 		eCenterShiftX <<= drRoundless->getCenter().x;
 		eCenterShiftY <<= drRoundless->getCenter().y;
@@ -547,7 +535,7 @@ public:
 	OperationMilling* setOperation(Operation *operation) {
 		if (operation == NULL) {
 			this->operation = NULL;
-			eTool.Clear();
+			dlTool = -1;
 			eDepth.Clear();
 			return NULL;
 		}
@@ -557,7 +545,7 @@ public:
 			milling = new OperationMilling(operation);
 		}
 		this->operation = milling;
-		eTool <<= milling->getTool();
+		dlTool <<= milling->getTool();
 		eDepth <<= milling->getDepth();
 		return isCreateNew ? milling : NULL;
 	}
