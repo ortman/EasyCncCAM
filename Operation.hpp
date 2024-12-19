@@ -217,7 +217,7 @@ public:
 	}
 	
 	virtual String ToString() {
-		return String(t_("DrillArray(")) + DblStr(tool.diameter) + " x " + DblStr(depth) + t_(") Array: ") + count.ToString();
+		return String(t_("Drill")) + "(" + DblStr(tool.diameter) + " x " + DblStr(depth) + ") " + t_("Array:") + " " + count.ToString();
 	}
 };
 
@@ -306,7 +306,7 @@ public:
 	}
 	
 	virtual String ToString() {
-		return String(t_("DrillRoundless(")) + DblStr(tool.diameter) + " x " + DblStr(depth) + t_(") Radius: ") + DblStr(radius) + ", Count: " + IntStr(count);
+		return String(t_("Drill")) + "(" + DblStr(tool.diameter) + " x " + DblStr(depth) + ") " + t_("Radius:") + " " + DblStr(radius) + ", " + t_("Count:") + " " + IntStr(count);
 	}
 };
 
@@ -344,7 +344,7 @@ public:
 	}
 
 	virtual String ToString() {
-		return String(t_("Milling(")) + ")";
+		return String(t_("Milling")) + "(" + DblStr(tool.diameter) + " x " + DblStr(depth) + ")";
 	}
 };
 
@@ -450,6 +450,7 @@ public:
 		for (Tool &t : Tool::tools) {
 			dlTool.Add(t, t.ToString());
 		}
+		if (operation != NULL) dlTool <<= operation->getTool();
 	}
 };
 
@@ -551,6 +552,7 @@ public:
 		for (Tool &t : Tool::tools) {
 			dlTool.Add(t, t.ToString());
 		}
+		if (operation != NULL) dlTool <<= operation->getTool();
 	}
 };
 
@@ -601,5 +603,6 @@ public:
 		for (Tool &t : Tool::tools) {
 			dlTool.Add(t, t.ToString());
 		}
+		if (operation != NULL) dlTool <<= operation->getTool();
 	}
 };
