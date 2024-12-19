@@ -47,7 +47,7 @@ class OperationDrill : public Operation {
 protected:
 	Vector<Pointf> drills;
 	double depth = 0.1;
-	Pointf center = {0., -0.};
+	Pointf center = {0., 0.};
 	bool isDrawDrillCenter = false;
 	OperationDrill(){};
 	
