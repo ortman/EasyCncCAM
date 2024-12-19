@@ -7,26 +7,29 @@ private:
 	struct ToolListDisplay : public Display {
 		virtual void Paint(Draw& w, const Rect& r, const Value& q, Color ink, Color paper, dword style) const {
 			PaintBackground(w, r, q, ink, paper, style);
-		Tool* tool = (Tool*)(int64)q;
-		if (tool != NULL) {
-				String s = tool->ToString();
-				int tcy = GetTextSize(s, StdFont()).cy;
-		    int c = 0;
-				w.DrawText(r.left + c + 3, r.top+(r.GetHeight() - tcy) / 2, s, StdFont(), ink);
-			}
+			Tool tool = q;
+			String s = tool.ToString();
+			int tcy = GetTextSize(s, StdFont()).cy;
+	    int c = 0;
+			w.DrawText(r.left + c + 3, r.top+(r.GetHeight() - tcy) / 2, s, StdFont(), ink);
 		}
 	};
 	ToolListDisplay toolListDisplay;
-	Tool *selectedTool = NULL;
+	Tool selectedTool;
 public:
 	ToolEditor() {
 		CtrlLayout(*this, t_("Tool editor"));
 		Sizeable().Zoomable();
 		bAdd.WhenPush = [=] {
-			Tool *t = new Tool(Tool::Drill, 0, 0, 0);
-			Tool::tools.Add(t);
-			clTools.Add((int64)t);
+			Tool t(Tool::Drill, 0, 0, 0);
+			clTools.Add(t);
 			clTools.SetCursor(clTools.GetCount()-1);
+		};
+		bRemove.WhenPush = [=] {
+			int i = clTools.GetCursor();
+			if (i >= 0) {
+				clTools.Remove(i);
+			}
 		};
 		
 		dlType.Add(Tool::Drill, Tool::typeToString(Tool::Drill, true));
@@ -40,43 +43,62 @@ public:
 		clTools.SetDisplay(toolListDisplay);
 		clTools.WhenSel = [=] {
 			int i = clTools.GetCursor();
-			if (i >= 0 && i < Tool::tools.GetCount()) {
-				Tool *t = Tool::tools[i];
-				selectedTool = t;
-				dlType <<= t->type;
-				eDiameter <<= t->diameter;
-				eLength <<= t->length;
-				eSpeed <<= t->speed;
+			if (i >= 0) {
+				selectedTool = clTools.GetValue(i);
+				dlType <<= selectedTool.type;
+				eDiameter <<= selectedTool.diameter;
+				eLength <<= selectedTool.length;
+				eSpeed <<= selectedTool.speed;
+			} else {
+				dlType = -1;
+				eDiameter.Clear();
+				eLength.Clear();
+				eSpeed.Clear();
 			}
 		};
 		dlType.WhenAction = [=] {
-			if (dlType.GetIndex() >=0 && selectedTool != NULL) {
-				selectedTool->type = (Tool::Type)(dlType.GetIndex()+1);
+			int i = clTools.GetCursor();
+			int t = dlType.GetIndex()+1;
+			if (t > 0 && i >= 0) {
+				selectedTool.type = (Tool::Type)t;
+				clTools.Set(i , selectedTool);
+				clTools.Refresh();
 			}
-			clTools.Refresh();
 		};
 		eDiameter.WhenAction = [=] {
-			if (selectedTool != NULL) {
-				selectedTool->diameter = eDiameter;
+			int i = clTools.GetCursor();
+			if (i >= 0) {
+				selectedTool.diameter = eDiameter;
+				clTools.Set(i , selectedTool);
+				clTools.Refresh();
 			}
-			clTools.Refresh();
 		};
 		eLength.WhenAction = [=] {
-			if (selectedTool != NULL) {
-				selectedTool->length = eLength;
+			int i = clTools.GetCursor();
+			if (i >= 0) {
+				selectedTool.length = eLength;
+				clTools.Set(i , selectedTool);
+				clTools.Refresh();
 			}
-			clTools.Refresh();
 		};
 		eSpeed.WhenAction = [=] {
-			if (selectedTool != NULL) {
-				selectedTool->speed = eSpeed;
+			int i = clTools.GetCursor();
+			if (i >= 0) {
+				selectedTool.speed = eSpeed;
+				clTools.Set(i , selectedTool);
+				clTools.Refresh();
 			}
-			clTools.Refresh();
 		};
 		
 		bOk.WhenPush = [=] {
+			Tool::tools.Clear();
+			int cnt = clTools.GetCount();
+			for (int i = 0; i < cnt; ++i) {
+				Tool::tools.Add(clTools.GetValue(i));
+			}
 			Settings::Save();
 			Close();
+			WhenClose(); // TODO:: Why?
 		};
 		
 		bCancel.WhenPush = [=] {
@@ -85,17 +107,13 @@ public:
 	}
 
 	~ToolEditor() {
-		selectedTool = NULL;
-		for (Tool *t : Tool::tools) {
-			delete t;
-		}
-		Tool::tools.clear();
+		//Tool::tools.clear();
 	}
 	
 	int Run(bool appmodal = false) {
 		clTools.Clear();
-		for (Tool *t : Tool::tools) {
-			clTools.Add((int64)t);
+		for (Tool t : Tool::tools) {
+			clTools.Add(t);
 		}
 		if (clTools.GetCount() > 0) clTools.SetCursor(0);
 		return TopWindow::Run(appmodal);

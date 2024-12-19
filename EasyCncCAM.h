@@ -18,7 +18,7 @@ private:
 	ToolEditor toolEditor;
 	FileSel sel;
 	OperationListDisplay operationListDisplay;
-	Operation *currentOperation = new OperationDrillArray();
+	Operation *currentOperation = NULL;
 	Vector<Operation*> operations;
 	OperationArrayTab operationArrayTab;
 	OperationRoundlessTab operationRoundlessTab;

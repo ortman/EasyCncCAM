@@ -17,7 +17,7 @@ struct Tool : ValueType<Tool, 10013, Comparable<Tool, Moveable<Tool>>> {
 	double length;
 	double speed;
 //public:
-	static Vector<Tool*> tools;
+	static Vector<Tool> tools;
 	Tool() {}
 	Tool(Tool::Type t, double d, double l, double s) : type(t), diameter(d), length(l), speed(s) {}
 	Tool(const Value& v) {
@@ -27,7 +27,15 @@ struct Tool : ValueType<Tool, 10013, Comparable<Tool, Moveable<Tool>>> {
 		speed = v["speed"];
 	}
 
-	operator Value() const { return RichValue<Tool>(*this); }
+	operator Value() const {
+		//return RichValue<Tool>(*this);
+		Value v;
+		v("type") = typeToString(type);
+		v("diameter") = diameter;
+		v("length") = length;
+		v("speed") = speed;
+		return v;
+	}
 	int Compare(const Tool& o) const { return CombineCompare((int)type, (int)o.type)(diameter, o.diameter)(length, o.length)(speed, o.speed); }
 	void Serialize(Stream& s) {
 		//String t = typeToString(type);
@@ -95,7 +103,7 @@ struct Tool : ValueType<Tool, 10013, Comparable<Tool, Moveable<Tool>>> {
 	static dword ValueTypeNo() { return 10013; }
 };
 
-Vector<Tool*> Tool::tools;
+Vector<Tool> Tool::tools;
 
 INITBLOCK {
     Value::Register<Tool>();

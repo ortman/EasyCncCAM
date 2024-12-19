@@ -92,13 +92,13 @@ public:
 		Image m = Ctrl::OverrideCursor(Image::SizeAll());
 	}
 	
-    virtual void MouseMove(Point p, dword keyflags) {
-        if (startDrag.x > 0) {
-	        shiftDrag.x = p.x - startDrag.x;
-	        shiftDrag.y = p.y - startDrag.y;
-	        Refresh();
-        }
+  virtual void MouseMove(Point p, dword keyflags) {
+    if (startDrag.x > 0) {
+      shiftDrag.x = p.x - startDrag.x;
+      shiftDrag.y = p.y - startDrag.y;
+      Refresh();
     }
+  }
     
 	virtual void LeftUp(Point p, dword keyflags) {
 		startDrag = {-1, -1};

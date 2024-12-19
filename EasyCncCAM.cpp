@@ -41,6 +41,14 @@ EasyCncCAM::EasyCncCAM() {
 	bRemoveOperation.Disable();
 	bAddOperation.WhenPush = [=] {
 		OperationDrill *o = new OperationDrillRoundless();
+		if (currentOperation != NULL) {
+			o->setTool(currentOperation->getTool());
+			OperationDrill* od = dynamic_cast<OperationDrill*>(currentOperation);
+			if (od != NULL) o->setDepth(od->getDepth());
+		} else if (Tool::tools.GetCount() > 0) {
+			o->setTool(Tool::tools[0]);
+		}
+		
 		o->setDrawDrillCenter(oShowDrillCenters);
 		operations.Add(o);
 		clOperations.Add((int64)o);
@@ -76,28 +84,37 @@ EasyCncCAM::EasyCncCAM() {
 			clOperations.Remove(i);
 			updateOperationTab();
 		}
-		//bRemoveOperation.Enable(clOperations.GetCursor()>=0);
 	};
 	
 	tOperationSettings.Add(operationArrayTab, t_("Array"));
 	tOperationSettings.Add(operationRoundlessTab, t_("Roundless"));
 	tOperationSettings.Add(operationMillingTab, t_("Milling"));
-	operationArrayTab.setOperation(currentOperation);
-	operationArrayTab.WhenAction = [=] {
-		viewer.Refresh();
-		clOperations.Refresh();
-	};
-	operationRoundlessTab.WhenAction = [=] {
-		viewer.Refresh();
-		clOperations.Refresh();
-	};
+	
+	operationArrayTab.WhenAction =
+	operationRoundlessTab.WhenAction =
 	operationMillingTab.WhenAction = [=] {
 		viewer.Refresh();
 		clOperations.Refresh();
 	};
-		
-	operations.Add(currentOperation);
-	clOperations.Add((int64)currentOperation);
+	
+	operationArrayTab.WhenPushToolEditor =
+	operationRoundlessTab.WhenPushToolEditor =
+	operationMillingTab.WhenPushToolEditor  = [=] {
+		toolEditor.Run();
+	};
+	toolEditor.WhenClose = [=] {
+		operationArrayTab.updateToolList();
+		operationRoundlessTab.updateToolList();
+		operationMillingTab.updateToolList();
+	};
+
+	if (Tool::tools.GetCount() > 0) {
+		currentOperation = new OperationDrillArray();
+		currentOperation->setTool(Tool::tools[0]);
+		//operationArrayTab.setOperation(currentOperation);
+		operations.Add(currentOperation);
+		clOperations.Add((int64)currentOperation);
+	}
 	
 	tOperationSettings.WhenAction = [=]{
 		updateOperationTab();
@@ -194,8 +211,8 @@ void EasyCncCAM::OperationListDisplay::Paint(Draw& w, const Rect& r, const Value
 	if (op != NULL) {
 		String s = op->ToString();
 		int tcy = GetTextSize(s, StdFont()).cy;
-	    //int c = r.Deflated(1).GetSize().cy;
-	    int c = 0;
+	  //int c = r.Deflated(1).GetSize().cy;
+	  int c = 0;
 		w.DrawText(r.left + c + 3, r.top+(r.GetHeight() - tcy) / 2, s, StdFont(), ink);
 	}
 }

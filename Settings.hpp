@@ -10,22 +10,15 @@ public:
 	static Settings settings;
 	void Jsonize(JsonIO& json) {
 		if (json.IsStoring()) {
-			Vector<Tool> vt;
-			for (Tool* t : Tool::tools) {
-				vt.Add(*t);
-			}
-			json("tools", vt);
+			json("tools", Tool::tools);
 		} else {
 			Value v = json.Get();
 			if (!v.IsNull()) {
-				for (Tool* t : Tool::tools) {
-					delete t;
-				}
 				Tool::tools.Clear();
 				ValueArray valueTools = v["tools"];
 				for (Tool valueTool: valueTools) {
 					DUMP(valueTool);
-					Tool::tools.Add(new Tool(valueTool));
+					Tool::tools.Add(valueTool);
 				}
 			}
 		}

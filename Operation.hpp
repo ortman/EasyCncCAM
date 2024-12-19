@@ -30,11 +30,14 @@ public:
 	}
 	virtual void calculateDraw() {
 	}
+	virtual void calculate() {
+	}
 	Tool& getTool() {
 		return tool;
 	}
 	void setTool(const Tool& tool) {
 		this->tool = tool;
+		calculate();
 	}
 };
 
@@ -98,9 +101,9 @@ protected:
 public:
 	
 	OperationDrill(Operation* operation) {
+		tool = operation->getTool();
 		OperationDrill *dr = dynamic_cast<OperationDrill*>(operation);
 		if (dr) {
-			tool = dr->tool;
 			depth = dr->depth;
 			center = dr->center;
 			isDrawDrillCenter = dr->isDrawDrillCenter;
@@ -119,7 +122,7 @@ public:
 	Pointf getCenter() {return center;}
 	void setCenter(const Pointf p) {
 		center = p;
-		calculateDrills();
+		calculate();
 	}
 	
 	Vector<Pointf>& getDrills() {return drills;}
@@ -128,12 +131,12 @@ public:
 	
 	void setDepth(double d) {depth = d;}
 		
-	virtual void calculateDrills() {};
+	//virtual void calculateDrills() {};
 	
 	bool getDrawDrillCenter() {return isDrawDrillCenter;}
 	void setDrawDrillCenter(bool b) {
 		isDrawDrillCenter = b;
-		calculateDraw();
+		calculate();
 	}
 		
 	virtual String ToString() {
@@ -147,7 +150,7 @@ class OperationDrillArray : public OperationDrill {
 	Size count;
 	
 private:
-	void calculateDrills() {
+	void calculate() {
 		drills.clear();
 		double sx, sy, startX, startY;
 		if (count.cx > 1) {
@@ -174,15 +177,15 @@ private:
 	
 public:
 	OperationDrillArray() {
-		size = {100., 50.};
+		size = {30., 20.};
 		count = {3, 2};
-		calculateDrills();
+		calculate();
 	}
 	
 	OperationDrillArray(Operation *operation) : OperationDrill(operation) {
-		size = {100., 50.};
+		size = {30., 20.};
 		count = {3, 2};
-		calculateDrills();
+		calculate();
 	}
 	
 	OperationDrillArray(Pointf center, Sizef size, Size count) {
@@ -192,13 +195,13 @@ public:
 	Sizef getSize() {return size;}
 	void setSize(const Sizef s) {
 		size = s;
-		calculateDrills();
+		calculate();
 	}
 	
 	Size getCount() {return count;}
 	void setCount(const Size c) {
 		count = c;
-		calculateDrills();
+		calculate();
 	}
 	
 	void setArray(Pointf center, Sizef size, Size count) {
@@ -206,7 +209,7 @@ public:
 		this->center = center;
 		this->size = size;
 		this->count = count;
-		calculateDrills();
+		calculate();
 	}
 	
 	Sizef getDrawSize() {
@@ -225,7 +228,7 @@ private:
 	double startAngle;
 	double sector;
 	
-	void calculateDrills() {
+	void calculate() {
 		drills.clear();
 		double shiftAngle;
 		if (sector < 360. && count > 1) {
@@ -244,19 +247,19 @@ private:
 	
 public:
 	OperationDrillRoundless() {
-		radius = 50.;
+		radius = 30.;
 		count = 6;
 		startAngle = 0.;
 		sector = 360.;
-		calculateDrills();
+		calculate();
 	}
 	
 	OperationDrillRoundless(Operation *operation) : OperationDrill(operation) {
-		radius = 50.;
+		radius = 30.;
 		count = 6;
 		startAngle = 0.;
 		sector = 360.;
-		calculateDrills();
+		calculate();
 	}
 	
 	OperationDrillRoundless(Pointf center, double radius, int count, double startAngle, double sector) {
@@ -266,25 +269,25 @@ public:
 	double getRadius() {return radius;}
 	void setRadius(const double r) {
 		radius = r;
-		calculateDrills();
+		calculate();
 	}
 	
 	int getCount() {return count;}
 	void setCount(const int c) {
 		count = c;
-		calculateDrills();
+		calculate();
 	}
 	
 	double getStartAngle() {return startAngle;}
 	void setStartAngle(const double a) {
 		startAngle = a;
-		calculateDrills();
+		calculate();
 	}
 	
 	double getSector() {return sector;}
 	void setSector(const double s) {
 		sector = s;
-		calculateDrills();
+		calculate();
 	}
 	
 	void setRoundless(Pointf center, double radius, int count, double startAngle, double sector) {
@@ -294,7 +297,7 @@ public:
 		this->count = count;
 		this->startAngle = startAngle;
 		this->sector = sector;
-		calculateDrills();
+		calculate();
 	}
 	
 	Sizef getDrawSize() {
@@ -311,7 +314,7 @@ class OperationMilling : public Operation {
 private:
 	double depth;
 	
-	void calculateMilling() {
+	void calculate() {
 	}
 public:
 	OperationMilling() {
@@ -334,74 +337,82 @@ public:
 	
 	void setDepth(double d) {
 		depth = d;
-		calculateMilling();
+		calculate();
 	}
 	Sizef getDrawSize() {
 		return {1., 1.};
 	}
 
-
+	virtual String ToString() {
+		return String(t_("Milling(")) + ")";
+	}
 };
 
 class OperationArrayTab : public WithOperationArray<Ctrl> {
 private:
 	OperationDrillArray *operation = NULL;
 public:
+	Event<> WhenPushToolEditor;
 	OperationArrayTab() {
 		CtrlLayout(*this);
+		updateToolList();
+		bToolEditor.WhenPush = [=] {
+			WhenPushToolEditor();
+		};
 		dlTool.WhenAction = [=] {
-			if (operation) {
-				operation->setTool(dlTool.GetValue());
+			int i = dlTool.GetIndex();
+			if (operation && i >= 0) {
+				operation->setTool(dlTool.GetKey(i));
+				Action();
 			}
-			Action();
 		};
 		eDepth.WhenAction = [=] {
 			if (operation) {
 				operation->setDepth(eDepth);
+				Action();
 			}
-			Action();
 		};
 		eCenterShiftX.WhenAction = [=] {
 			if (operation) {
 				Pointf center = operation->getCenter();
 				operation->setCenter({eCenterShiftX, center.y});
+				Action();
 			}
-			Action();
 		};
 		eCenterShiftY.WhenAction = [=] {
 			if (operation) {
 				Pointf center = operation->getCenter();
 				operation->setCenter({center.x, eCenterShiftY});
+				Action();
 			}
-			Action();
 		};
 		eWidth.WhenAction = [=] {
 			if (operation) {
 				Sizef size = operation->getSize();
 				operation->setSize({eWidth, size.cy});
+				Action();
 			}
-			Action();
 		};
 		eHeight.WhenAction = [=] {
 			if (operation) {
 				Sizef size = operation->getSize();
 				operation->setSize({size.cx, eHeight});
+				Action();
 			}
-			Action();
 		};
 		eCountX.WhenAction = [=] {
 			if (operation) {
 				Size count = operation->getCount();
 				operation->setCount({eCountX, count.cy});
+				Action();
 			}
-			Action();
 		};
 		eCountY.WhenAction = [=] {
 			if (operation) {
 				Size count = operation->getCount();
 				operation->setCount({count.cx, eCountY});
+				Action();
 			}
-			Action();
 		};
 	}
 	OperationDrillArray* setOperation(Operation *operation) {
@@ -434,63 +445,75 @@ public:
 		
 		return isCreateNew ? drArray : NULL;
 	}
+	void updateToolList() {
+		dlTool.Clear();
+		for (Tool &t : Tool::tools) {
+			dlTool.Add(t, t.ToString());
+		}
+	}
 };
 
 class OperationRoundlessTab : public WithOperationRoudless<ParentCtrl> {
 private:
 	OperationDrillRoundless *operation = NULL;
 public:
+	Event<> WhenPushToolEditor;
 	OperationRoundlessTab() {
 		CtrlLayout(*this);
+		updateToolList();
+		bToolEditor.WhenPush = [=] {
+			WhenPushToolEditor();
+		};
 		dlTool.WhenAction = [=] {
-			if (operation) {
-				operation->setTool(dlTool.GetValue());
+			int i = dlTool.GetIndex();
+			if (operation && i >= 0) {
+				operation->setTool(dlTool.GetKey(i));
+				Action();
 			}
-			Action();
 		};
 		eDepth.WhenAction = [=] {
 			if (operation) {
 				operation->setDepth(eDepth);
+				Action();
 			}
-			Action();
 		};
 		eCenterShiftX.WhenAction = [=] {
 			if (operation) {
 				Pointf center = operation->getCenter();
 				operation->setCenter({eCenterShiftX, center.y});
+				Action();
 			}
-			Action();
 		};
 		eCenterShiftY.WhenAction = [=] {
 			if (operation) {
 				Pointf center = operation->getCenter();
 				operation->setCenter({center.x, eCenterShiftY});
+				Action();
 			}
-			Action();
 		};
 		eRadius.WhenAction = [=] {
 			if (operation) {
 				operation->setRadius(eRadius);
+				Action();
 			}
-			Action();
 		};
 		eCount.WhenAction = [=] {
 			if (operation) {
 				operation->setCount(eCount);
+				Action();
 			}
-			Action();
 		};
 		eStartAngle.WhenAction = [=] {
 			if (operation) {
 				operation->setStartAngle(eStartAngle);
+				Action();
 			}
-			Action();
 		};
 		eSector.WhenAction = [=] {
 			if (operation) {
 				operation->setSector(eSector);
+				Action();
 			}
-			Action();
 		};
 	}
 	OperationDrillRoundless* setOperation(Operation *operation) {
@@ -523,14 +546,38 @@ public:
 		
 		return isCreateNew ? drRoundless : NULL;
 	}
+	void updateToolList() {
+		dlTool.Clear();
+		for (Tool &t : Tool::tools) {
+			dlTool.Add(t, t.ToString());
+		}
+	}
 };
 
 class OperationMillingTab : public WithOperationMilling<ParentCtrl> {
 private:
 	OperationMilling *operation = NULL;
 public:
+	Event<> WhenPushToolEditor;
 	OperationMillingTab() {
 		CtrlLayout(*this);
+		updateToolList();
+		bToolEditor.WhenPush = [=] {
+			WhenPushToolEditor();
+		};
+		dlTool.WhenAction = [=] {
+			int i = dlTool.GetIndex();
+			if (operation && i >= 0) {
+				operation->setTool(dlTool.GetKey(i));
+				Action();
+			}
+		};
+		eDepth.WhenAction = [=] {
+			if (operation) {
+				operation->setDepth(eDepth);
+				Action();
+			}
+		};
 	}
 	OperationMilling* setOperation(Operation *operation) {
 		if (operation == NULL) {
@@ -548,5 +595,11 @@ public:
 		dlTool <<= milling->getTool();
 		eDepth <<= milling->getDepth();
 		return isCreateNew ? milling : NULL;
+	}
+	void updateToolList() {
+		dlTool.Clear();
+		for (Tool &t : Tool::tools) {
+			dlTool.Add(t, t.ToString());
+		}
 	}
 };
