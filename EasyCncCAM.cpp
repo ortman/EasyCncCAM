@@ -14,24 +14,23 @@ EasyCncCAM::EasyCncCAM() {
 		});
 		bar.Sub(t_("View"), [=](Bar &bar) {
 			bar.Add(t_("Show drill centers"), [=] {
-				oShowDrillCenters = !oShowDrillCenters;
-				oShowDrillCenters.Action();
+				viewer.SetDrawDrillCenter(viewer.GetDrawDrillCenter());
 			});
 			bar.Add(t_("Show coordinate axis"), [=] {
-				oShowCoordinates = !oShowCoordinates;
-				oShowCoordinates.Action();
+				viewer.SetDrawCoordinates(viewer.GetDrawCoordinates());
 			});
 		});
 	});
 	
+	bShowCoordinates.SetImage(ResourceImage::Coordinates());
+	bShowDrillCenters.SetImage(ResourceImage::DrillCenters());
+	
 	bGenerate.SetStyle(Button::StyleOk());
-	oShowCoordinates <<= true;
-	oShowDrillCenters <<= false;
-	oShowCoordinates.WhenAction = [=] {
-		viewer.drawCoordinates(oShowCoordinates);
+	bShowCoordinates.WhenPush = [=] {
+		viewer.SetDrawCoordinates(viewer.GetDrawCoordinates());
 	};
-	oShowDrillCenters.WhenAction = [=] {
-		viewer.drawDrillCenter(oShowDrillCenters);
+	bShowDrillCenters.WhenPush = [=] {
+		viewer.SetDrawDrillCenter(viewer.GetDrawDrillCenter());
 	};
 	
 	bShowAll.WhenAction = [=] {
@@ -49,7 +48,7 @@ EasyCncCAM::EasyCncCAM() {
 			o->setTool(Tool::tools[0]);
 		}
 		
-		o->setDrawDrillCenter(oShowDrillCenters);
+		o->setDrawDrillCenter(viewer.GetDrawDrillCenter());
 		operations.Add(o);
 		clOperations.Add((int64)o);
 		clOperations.SetCursor(clOperations.GetCount()-1);
@@ -157,7 +156,7 @@ void EasyCncCAM::updateOperationTab() {
 		case 0: {
 			OperationDrill *op = operationArrayTab.setOperation(currentOperation);
 			if (op) { // transform operation
-				op->setDrawDrillCenter(oShowDrillCenters);
+				op->setDrawDrillCenter(viewer.GetDrawDrillCenter());
 				int idx = FindOperation(currentOperation);
 				if (idx >= 0) {
 					operations[idx] = op;
@@ -173,7 +172,7 @@ void EasyCncCAM::updateOperationTab() {
 		case 1: {
 			OperationDrill *op = operationRoundlessTab.setOperation(currentOperation);
 			if (op) { // transform operation
-				op->setDrawDrillCenter(oShowDrillCenters);
+				op->setDrawDrillCenter(viewer.GetDrawDrillCenter());
 				int idx = FindOperation(currentOperation);
 				if (idx >= 0) {
 					operations[idx] = op;

@@ -20,12 +20,14 @@ private:
 	Pointf shiftDrag = {0., 0.};
 	Pointf startDrag = {0, 0};
 public:
-	void drawCoordinates(bool isDraw = true) {
+	bool GetDrawCoordinates() { return isDrawCoordinates; }
+	void SetDrawCoordinates(bool isDraw = true) {
 		isDrawCoordinates = isDraw;
 		Refresh();
 	}
 	
-	void drawDrillCenter(bool isDraw = true) {
+	bool GetDrawDrillCenter() { return isDrawDrillCenter; }
+	void SetDrawDrillCenter(bool isDraw = true) {
 		isDrawDrillCenter = isDraw;
 		if (operations != NULL) {
 			for (Operation *op : *operations) {

@@ -5,7 +5,9 @@
 #include <CtrlCore/lay.h>
 
 #define IMAGEFILE <EasyCncCAM/EasyCncCAM.iml>
-#include <Draw/iml_header.h>
+#define IMAGECLASS ResourceImage
+#include <Draw/iml.h>
+//#include <Draw/iml_header.h>
 
 #define TFILE <EasyCncCAM/Translation.t>
 #include <Core/t.h>
