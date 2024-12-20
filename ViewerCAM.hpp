@@ -16,6 +16,7 @@ private:
 	Vector<Operation*>* operations = NULL;
 	bool isDrawCoordinates = true;
 	bool isDrawDrillCenter = false;
+	bool isDrawMeasure = true;
 	double scale = 1.;
 	Pointf shiftDrag = {0., 0.};
 	Pointf startDrag = {0, 0};
@@ -35,6 +36,17 @@ public:
 					OperationDrill *dr = dynamic_cast<OperationDrill*>(op);
 					if (dr) dr->setDrawDrillCenter(isDraw);
 				}
+			}
+		}
+		Refresh();
+	}
+	
+	bool GetDrawMeasure() { return isDrawMeasure; }
+	void SetDrawMeasure(bool isDraw = true) {
+		isDrawMeasure = isDraw;
+		if (operations != NULL) {
+			for (Operation *op : *operations) {
+				if (op) op->setDrawMeasure(isDraw);
 			}
 		}
 		Refresh();
@@ -115,12 +127,12 @@ public:
 		shiftDrag = {0., 0.};
 		if (operations != NULL && operations->GetCount() > 0) {
 			int cnt = operations->GetCount();
-			Operation *o = *operations[0];
+			Operation *o = (*operations)[0];
 			sz = o->getDrawSize();
 			sft = o->getDrawShift();
 			operationsRect = {sft.x, sft.y, sz.cx + sft.x, sz.cy + sft.y};
 			for (int i=1; i<cnt; ++i) {
-				o = *operations[i];
+				o = (*operations)[i];
 				if (o != NULL) {
 					sz = o->getDrawSize();
 					sft = o->getDrawShift();

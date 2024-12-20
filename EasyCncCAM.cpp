@@ -3,6 +3,29 @@
 EasyCncCAM::EasyCncCAM() {
 	CtrlLayout(*this, "Easy CNC CAM");
 	Sizeable().Zoomable();
+	
+	bShowCoordinates.SetImage(ResourceImage::Coordinates());
+	bShowDrillCenters.SetImage(ResourceImage::DrillCenters());
+	bShowAll.SetImage(ResourceImage::ShowAll());
+	bShowMeasure.SetImage(ResourceImage::Measure());
+	
+	bGenerate.SetStyle(Button::StyleOk());
+	bShowCoordinates.WhenPush = [=] {
+			bool enabled = !viewer.GetDrawCoordinates();
+			viewer.SetDrawCoordinates(enabled);
+			bShowCoordinates.SetStyle(enabled ? Button::StyleOk() : Button::StyleNormal());
+	};
+	bShowDrillCenters.WhenPush = [=] {
+			bool enabled = !viewer.GetDrawDrillCenter();
+			viewer.SetDrawDrillCenter(enabled);
+			bShowDrillCenters.SetStyle(enabled ? Button::StyleOk() : Button::StyleNormal());
+	};
+	bShowMeasure.WhenPush = [=] {
+			bool enabled = !viewer.GetDrawMeasure();
+			viewer.SetDrawMeasure(enabled);
+			bShowMeasure.SetStyle(enabled ? Button::StyleOk() : Button::StyleNormal());
+	};
+	
 	AddFrame(menu);
 	menu.Set([=](Bar &bar) {
 		bar.Sub(t_("File"), [=](Bar &bar) {
@@ -14,24 +37,22 @@ EasyCncCAM::EasyCncCAM() {
 		});
 		bar.Sub(t_("View"), [=](Bar &bar) {
 			bar.Add(t_("Show drill centers"), [=] {
-				viewer.SetDrawDrillCenter(viewer.GetDrawDrillCenter());
+				bool enabled = !viewer.GetDrawDrillCenter();
+				viewer.SetDrawDrillCenter(enabled);
+				bShowDrillCenters.SetStyle(enabled ? Button::StyleOk() : Button::StyleNormal());
 			});
 			bar.Add(t_("Show coordinate axis"), [=] {
-				viewer.SetDrawCoordinates(viewer.GetDrawCoordinates());
+				bool enabled = !viewer.GetDrawCoordinates();
+				viewer.SetDrawCoordinates(enabled);
+				bShowCoordinates.SetStyle(enabled ? Button::StyleOk() : Button::StyleNormal());
+			});
+			bar.Add(t_("Show measurers"), [=] {
+				bool enabled = !viewer.GetDrawMeasure();
+				viewer.SetDrawMeasure(enabled);
+				bShowMeasure.SetStyle(enabled ? Button::StyleOk() : Button::StyleNormal());
 			});
 		});
 	});
-	
-	bShowCoordinates.SetImage(ResourceImage::Coordinates());
-	bShowDrillCenters.SetImage(ResourceImage::DrillCenters());
-	
-	bGenerate.SetStyle(Button::StyleOk());
-	bShowCoordinates.WhenPush = [=] {
-		viewer.SetDrawCoordinates(viewer.GetDrawCoordinates());
-	};
-	bShowDrillCenters.WhenPush = [=] {
-		viewer.SetDrawDrillCenter(viewer.GetDrawDrillCenter());
-	};
 	
 	bShowAll.WhenAction = [=] {
 		viewer.showAllView();
@@ -49,6 +70,7 @@ EasyCncCAM::EasyCncCAM() {
 		}
 		
 		o->setDrawDrillCenter(viewer.GetDrawDrillCenter());
+		o->setDrawMeasure(viewer.GetDrawMeasure());
 		operations.Add(o);
 		clOperations.Add((int64)o);
 		clOperations.SetCursor(clOperations.GetCount()-1);
@@ -108,9 +130,11 @@ EasyCncCAM::EasyCncCAM() {
 	};
 
 	if (Tool::tools.GetCount() > 0) {
-		currentOperation = new OperationDrillArray();
-		currentOperation->setTool(Tool::tools[0]);
-		//operationArrayTab.setOperation(currentOperation);
+		OperationDrillArray *op = new OperationDrillArray();
+		op->setTool(Tool::tools[0]);
+		op->setDrawMeasure(viewer.GetDrawMeasure());
+		op->setDrawDrillCenter(viewer.GetDrawDrillCenter());
+		currentOperation = op;
 		operations.Add(currentOperation);
 		clOperations.Add((int64)currentOperation);
 	}
@@ -128,6 +152,9 @@ EasyCncCAM::EasyCncCAM() {
 			ErrorOK("Oops(. This functionality is not exist!");
 		}
 	};
+	bShowCoordinates.SetStyle(viewer.GetDrawCoordinates() ? Button::StyleOk() : Button::StyleNormal());
+	bShowDrillCenters.SetStyle(viewer.GetDrawDrillCenter() ? Button::StyleOk() : Button::StyleNormal());
+	bShowMeasure.SetStyle(viewer.GetDrawMeasure() ? Button::StyleOk() : Button::StyleNormal());
 }
 
 EasyCncCAM::~EasyCncCAM() {
@@ -157,6 +184,7 @@ void EasyCncCAM::updateOperationTab() {
 			OperationDrill *op = operationArrayTab.setOperation(currentOperation);
 			if (op) { // transform operation
 				op->setDrawDrillCenter(viewer.GetDrawDrillCenter());
+				op->setDrawMeasure(viewer.GetDrawMeasure());
 				int idx = FindOperation(currentOperation);
 				if (idx >= 0) {
 					operations[idx] = op;
@@ -173,6 +201,7 @@ void EasyCncCAM::updateOperationTab() {
 			OperationDrill *op = operationRoundlessTab.setOperation(currentOperation);
 			if (op) { // transform operation
 				op->setDrawDrillCenter(viewer.GetDrawDrillCenter());
+				op->setDrawMeasure(viewer.GetDrawMeasure());
 				int idx = FindOperation(currentOperation);
 				if (idx >= 0) {
 					operations[idx] = op;
@@ -188,6 +217,7 @@ void EasyCncCAM::updateOperationTab() {
 		case 2: {
 			OperationMilling *op = operationMillingTab.setOperation(currentOperation);
 			if (op) { // transform operation
+				op->setDrawMeasure(viewer.GetDrawMeasure());
 				int idx = FindOperation(currentOperation);
 				if (idx >= 0) {
 					operations[idx] = op;

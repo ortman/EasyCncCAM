@@ -14,7 +14,7 @@ LAYOUT(OperationRoudless, 272, 200)
 	ITEM(Upp::EditDoubleSpin, eDepth, SetInc(1).LeftPosZ(132, 132).TopPosZ(32, 19))
 	ITEM(Upp::Label, dv___13, SetLabel(t_("Sector:")).SetAlign(Upp::ALIGN_RIGHT).LeftPosZ(12, 116).VSizePosZ(176, 5))
 	ITEM(Upp::EditDoubleSpin, eSector, SetInc(5).Min(0).Max(360).LeftPosZ(132, 132).VSizePosZ(176, 5))
-	ITEM(Upp::DropList, dlTool, LeftPosZ(132, 104).TopPosZ(8, 19))
+	ITEM(Upp::DropList, dlTool, LeftPosZ(132, 104).TopPosZ(9, 17))
 	ITEM(Upp::Button, bToolEditor, SetLabel(t_("...")).LeftPosZ(240, 24).TopPosZ(8, 19))
 END_LAYOUT
 
@@ -34,7 +34,7 @@ LAYOUT(OperationArray, 272, 200)
 	ITEM(Upp::Label, dv___12, SetLabel(t_("Depth:")).SetAlign(Upp::ALIGN_RIGHT).LeftPosZ(12, 116).TopPosZ(32, 19))
 	ITEM(Upp::EditDoubleSpin, eDepth, SetInc(1).LeftPosZ(132, 132).TopPosZ(32, 19))
 	ITEM(Upp::EditDoubleSpin, eCenterShiftY, SetInc(1).LeftPosZ(132, 132).TopPosZ(80, 19))
-	ITEM(Upp::DropList, dlTool, LeftPosZ(132, 104).TopPosZ(8, 19))
+	ITEM(Upp::DropList, dlTool, LeftPosZ(132, 104).TopPosZ(9, 17))
 	ITEM(Upp::Button, bToolEditor, SetLabel(t_("...")).LeftPosZ(240, 24).TopPosZ(8, 19))
 END_LAYOUT
 
@@ -42,7 +42,7 @@ LAYOUT(OperationMilling, 272, 200)
 	ITEM(Upp::Label, dv___0, SetLabel(t_("Tool:")).SetAlign(Upp::ALIGN_RIGHT).LeftPosZ(12, 116).TopPosZ(8, 19))
 	ITEM(Upp::Label, dv___1, SetLabel(t_("Depth:")).SetAlign(Upp::ALIGN_RIGHT).LeftPosZ(12, 116).TopPosZ(32, 19))
 	ITEM(Upp::EditDoubleSpin, eDepth, SetInc(1).LeftPosZ(132, 132).TopPosZ(32, 19))
-	ITEM(Upp::DropList, dlTool, LeftPosZ(132, 104).TopPosZ(8, 19))
+	ITEM(Upp::DropList, dlTool, LeftPosZ(132, 104).TopPosZ(9, 17))
 	ITEM(Upp::Button, bToolEditor, SetLabel(t_("...")).LeftPosZ(240, 24).TopPosZ(8, 19))
 END_LAYOUT
 

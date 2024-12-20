@@ -7,6 +7,7 @@
 using namespace Upp;
 
 #define OPERATION_SCALE 1.5
+#define OPERATION_DRAW_OFFSET 30.
 
 class Operation : public Moveable<Operation> {
 protected:
@@ -14,6 +15,55 @@ protected:
 	static double scale;
 	Pointf shiftDraw = {0., 0.};
 	Tool tool;
+	bool isDrawMeasure = false;
+	static Font measureFont;
+		
+	void DrawAlphaLine(int x1, int y1, int x2, int y2, int width, Color color, int alpha = 255) {
+			draw->DrawLine(x1, y1, x2, y2, width, color);
+			draw->Alpha().DrawLine(x1, y1, x2, y2, width, GrayColor(alpha));
+	}
+	void DrawAlphaEllipse(int x, int y, int cx, int cy, Color color, int pen, Color pencolor, int alpha = 255) {
+		draw->DrawEllipse(x, y, cx, cy, color, pen, pencolor);
+		draw->Alpha().DrawEllipse(x, y, cx, cy, color, pen, GrayColor(alpha));
+	}
+	void DrawAlphaPolygon(const Vector<Point>& vertices,
+			Color color = DefaultInk(), int width = 0, Color outline = Null, int alpha = 255,
+			uint64 pattern = 0, Color doxor = Null) {
+		draw->DrawPolygon(vertices, color, width, outline, pattern, doxor);
+		draw->Alpha().DrawPolygon(vertices, color, width, GrayColor(alpha), pattern, doxor);
+	}
+	void DrawAlphaTextA(int x, int y, int angle, const char *text, Font font = StdFont(),
+		          Color ink = DefaultInk(), int alpha = 255, int n = -1, const int *dx = NULL) {
+		draw->DrawTextA(x, y, angle, text, font, ink, n, dx);
+		draw->Alpha().DrawTextA(x, y, angle, text, font, GrayColor(alpha), n, dx);
+	}
+	void DrawAlphaArc(const Rect& rc, Point start, Point end, int width, Color color, int alpha = 255) {
+		draw->DrawArc(rc, start, end, width, color);
+		draw->Alpha().DrawArc(rc, start, end, width, GrayColor(alpha));
+	}
+	void DrawMeasureDiameter(double x, double y, double diameter, double angle) {
+		double radius = diameter / 2 + 2;
+		double xD = radius * cos(angle * M_PI/180);
+		double yD = radius * sin(angle * M_PI/180);
+		String text = DblStr(diameter);
+		Size textSize = GetTextSize(text, measureFont);
+		DrawAlphaLine(
+			(int)((x - xD - shiftDraw.x) * scale),
+			(int)((y + yD - shiftDraw.y) * scale),
+			(int)((x + xD - shiftDraw.x) * scale),
+			(int)((y - yD - shiftDraw.y) * scale),
+			1, Black());
+		DrawAlphaLine(
+			(int)((x + xD - shiftDraw.x) * scale),
+			(int)((y - yD - shiftDraw.y) * scale),
+			(int)((x + xD - shiftDraw.x) * scale + textSize.cx),
+			(int)((y - yD - shiftDraw.y) * scale),
+			1, Black());
+		DrawAlphaTextA(
+			(int)((x + xD - shiftDraw.x) * scale),
+			(int)((y - yD - shiftDraw.y) * scale - textSize.cy - 1),
+			0, text, measureFont, Black());
+	}
 public:
 	virtual ~Operation() {
 		if (draw) delete draw;
@@ -39,7 +89,14 @@ public:
 		this->tool = tool;
 		calculate();
 	}
+	bool getDrawMeasure() { return isDrawMeasure; }
+	void setDrawMeasure(bool isDraw = true) {
+		isDrawMeasure = isDraw;
+		calculateDraw();
+	}
 };
+
+Font Operation::measureFont = StdFont(20);
 
 double Operation::scale = OPERATION_SCALE;
 
@@ -51,49 +108,42 @@ protected:
 	bool isDrawDrillCenter = false;
 	OperationDrill(){};
 	
-	void calculateDraw() {
+	virtual void calculateDraw() {
 		Sizef size = getDrawSize();
 		this->shiftDraw = {center.x - size.cx/2, center.y - size.cy/2};
 		Size imgSize = {(int)(size.cx * scale), (int)(size.cy * scale)};
 		if (draw) delete draw;
 		draw = new ImageDraw(imgSize);
 		if (draw == NULL) return;
-		draw->Alpha().DrawRect({0, 0, (int)(imgSize.cx), (int)(imgSize.cy)}, GrayColor(0));
+		//draw->Alpha().DrawRect({0, 0, (int)(imgSize.cx), (int)(imgSize.cy)}, GrayColor(100));
+		//draw->DrawRect({0, 0, (int)(imgSize.cx), (int)(imgSize.cy)}, LtGreen());
 
 		double diameter = (tool.diameter + 1) * scale;
 		double radius = diameter / 2;
-		int pen = 1;
 		int x,y;
 		for (Pointf pd : drills) {
 			x = (int)((pd.x - shiftDraw.x) * scale - radius);
 			y = (int)((pd.y - shiftDraw.y) * scale - radius);
-			draw->DrawEllipse(x, y, (int)(diameter), (int)(diameter), Null, pen, Blue());
-			draw->Alpha().DrawEllipse(x, y, (int)(diameter), (int)(diameter), Null, pen, GrayColor(255));
+			DrawAlphaEllipse(x, y, (int)(diameter), (int)(diameter), Null, 2, Blue());
 			if (isDrawDrillCenter) {
-				draw->DrawLine(
+				DrawAlphaLine(
 					(int)((pd.x - shiftDraw.x) * scale),
 					(int)((pd.y - shiftDraw.y - 3) * scale - radius),
 					(int)((pd.x - shiftDraw.x) * scale),
 					(int)((pd.y - shiftDraw.y + 3) * scale + radius),
-					pen/*(drill < 20) ? pen : PEN_DASHDOT*/, LtRed());
-				draw->DrawLine(
+					1/*(drill < 20) ? pen : PEN_DASHDOT*/, LtRed());
+				DrawAlphaLine(
 					(int)((pd.x - shiftDraw.x - 3) * scale - radius),
 					(int)((pd.y - shiftDraw.y) * scale),
 					(int)((pd.x - shiftDraw.x + 3) * scale + radius),
 					(int)((pd.y - shiftDraw.y) * scale),
-					pen/*(drill < 20) ? pen : PEN_DASHDOT*/, LtRed());
-				draw->Alpha().DrawLine(
-					(int)((pd.x - shiftDraw.x) * scale),
-					(int)((pd.y - shiftDraw.y - 3) * scale - radius),
-					(int)((pd.x - shiftDraw.x) * scale),
-					(int)((pd.y - shiftDraw.y + 3) * scale + radius),
-					pen/*(drill < 20) ? pen : PEN_DASHDOT*/, GrayColor(255));
-				draw->Alpha().DrawLine(
-					(int)((pd.x - shiftDraw.x - 3) * scale - radius),
-					(int)((pd.y - shiftDraw.y) * scale),
-					(int)((pd.x - shiftDraw.x + 3) * scale + radius),
-					(int)((pd.y - shiftDraw.y) * scale),
-					pen/*(drill < 20) ? pen : PEN_DASHDOT*/, GrayColor(255));
+					1/*(drill < 20) ? pen : PEN_DASHDOT*/, LtRed());
+			}
+		}
+		if (isDrawMeasure) {
+			if (drills.GetCount() > 0) {
+				Pointf &d = drills[0];
+				DrawMeasureDiameter(d.x, d.y, tool.diameter, 45);
 			}
 		}
 	}
@@ -134,7 +184,7 @@ public:
 	//virtual void calculateDrills() {};
 	
 	bool getDrawDrillCenter() {return isDrawDrillCenter;}
-	void setDrawDrillCenter(bool b) {
+	void setDrawDrillCenter(bool b = true) {
 		isDrawDrillCenter = b;
 		calculate();
 	}
@@ -213,11 +263,27 @@ public:
 	}
 	
 	Sizef getDrawSize() {
-		return {size.cx + tool.diameter + 7., size.cy + tool.diameter + 7.};
+		return {size.cx + tool.diameter + OPERATION_DRAW_OFFSET, size.cy + tool.diameter + OPERATION_DRAW_OFFSET};
 	}
 	
 	virtual String ToString() {
 		return String(t_("Drilling")) + "(" + DblStr(tool.diameter) + " x " + DblStr(depth) + ") " + t_("Array:") + " " + count.ToString();
+	}
+	
+	virtual void calculateDraw() {
+		OperationDrill::calculateDraw();
+		if (isDrawMeasure) {
+			double delta = (tool.diameter + OPERATION_DRAW_OFFSET)/2;
+			int pen = 1;
+			if (count.cx > 1 && count.cy > 1) {
+				DrawAlphaPolygon({
+					{(int)(delta * scale), (int)(delta * scale)},
+					{(int)((size.cx+delta) * scale), (int)(delta * scale)},
+					{(int)((size.cx+delta) * scale), (int)((size.cy+delta) * scale)},
+					{(int)(delta * scale), (int)((size.cy+delta) * scale)}},
+					Null, pen, Black());
+			}
+		}
 	}
 };
 
@@ -301,12 +367,80 @@ public:
 	}
 	
 	Sizef getDrawSize() {
-		double width = radius * 2. + tool.diameter + 7.;
+		double width = radius * 2. + tool.diameter + OPERATION_DRAW_OFFSET;
 		return {width, width};
 	}
 	
 	virtual String ToString() {
 		return String(t_("Drilling")) + "(" + DblStr(tool.diameter) + " x " + DblStr(depth) + ") " + t_("Radius:") + " " + DblStr(radius) + ", " + t_("Count:") + " " + IntStr(count);
+	}
+	
+	virtual void calculateDraw() {
+		OperationDrill::calculateDraw();
+		if (isDrawMeasure) {
+			int pen = 1;
+			if (sector > 0. && sector < 360.) {
+				double radiusArc = radius/2;
+				Size ds = getDrawSize();
+				Pointf c = Pointf(
+					(ds.cx+0.5)/2,
+					(ds.cy+0.5)/2
+				);
+				DrawAlphaArc(RectC(
+						(int)((c.x - radiusArc) * scale),
+						(int)((c.y - radiusArc) * scale),
+						(int)(radiusArc * 2 * scale),
+						(int)(radiusArc * 2 * scale)
+					),
+					Point(
+						(int)((c.x + radiusArc * cos((sector + startAngle) * M_PI/180)) * scale),
+						(int)((c.y + radiusArc * sin((sector + startAngle) * M_PI/180)) * scale)
+					),
+					Point(
+						(int)((c.x + radiusArc * cos(startAngle * M_PI/180)) * scale),
+						(int)((c.y + radiusArc * sin(startAngle * M_PI/180)) * scale)
+					),
+					pen, Black
+				);
+				DrawAlphaLine(
+					(int)(c.x * scale),
+					(int)(c.y * scale),
+					(int)((c.x + radius * cos((sector + startAngle) * M_PI/180)) * scale),
+					(int)((c.y + radius * sin((sector + startAngle) * M_PI/180)) * scale),
+					pen, Black
+				);
+				DrawAlphaLine(
+					(int)(c.x * scale),
+					(int)(c.y * scale),
+					(int)((c.x + radius * cos(startAngle * M_PI/180)) * scale),
+					(int)((c.y + radius * sin(startAngle * M_PI/180)) * scale),
+					pen, Black
+				);
+				DrawAlphaArc(RectC(
+						(int)((c.x - radius) * scale),
+						(int)((c.y - radius) * scale),
+						(int)(radius * 2 * scale),
+						(int)(radius * 2 * scale)
+					),
+					Point(
+						(int)((c.x + radius * cos((sector + startAngle) * M_PI/180)) * scale),
+						(int)((c.y + radius * sin((sector + startAngle) * M_PI/180)) * scale)
+					),
+					Point(
+						(int)((c.x + radius * cos(startAngle * M_PI/180)) * scale),
+						(int)((c.y + radius * sin(startAngle * M_PI/180)) * scale)
+					),
+					pen, Black
+				);
+			} else {
+				double delta = (tool.diameter + OPERATION_DRAW_OFFSET)/2;
+				DrawAlphaEllipse(
+					(int)(delta * scale), (int)(delta * scale),
+					(int)((radius*2) * scale), (int)((radius*2) * scale),
+					Null, pen, Black());
+				DrawMeasureDiameter(center.x, center.y, radius*2, 45);
+			}
+		}
 	}
 };
 
