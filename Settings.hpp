@@ -6,8 +6,9 @@
 #define SETTINGS_FILENAME "EasyCncCAM_settings.json"
 
 class Settings {
-public:
+private:
 	static Settings settings;
+public:
 	void Jsonize(JsonIO& json) {
 		if (json.IsStoring()) {
 			json("tools", Tool::tools);
@@ -32,8 +33,11 @@ public:
 		out.Put(StoreAsJson(Settings::settings, true));
 		out.Close();
 	}
+	
+	static Color viewerBG;
 };
 
 Settings Settings::settings;
+Color Settings::viewerBG = Color(240, 240, 255);
 
 #endif

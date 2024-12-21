@@ -1,10 +1,12 @@
 #include <Core/Core.h>
-#include "Operation.hpp"
+#include "OperationDrillArray.hpp"
+#include "OperationDrillRoundless.hpp"
+#include "OperationMilling.hpp"
 
 using namespace Upp;
 
 #define MIN_SCALE 0.2
-#define MAX_SCALE 6.0
+#define MAX_SCALE 20.0
 
 class ViewerCAM : public Ctrl {
 private:
@@ -54,7 +56,7 @@ public:
 	
 	void Paint(Draw &w) {
 		Size sz = GetSize();
-		w.DrawRect(sz, Color(240, 240, 255));
+		w.DrawRect(sz, Settings::viewerBG);
 		Pointf shift = {(double)sz.cx / 2 + shiftDrag.x, (double)sz.cy / 2 + shiftDrag.y};
 		if (operations != NULL) {
 			for (Operation* o : *operations) {

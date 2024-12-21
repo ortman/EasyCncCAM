@@ -109,7 +109,7 @@ EasyCncCAM::EasyCncCAM() {
 	
 	tOperationSettings.Add(operationArrayTab, t_("Array"));
 	tOperationSettings.Add(operationRoundlessTab, t_("Roundless"));
-	tOperationSettings.Add(operationMillingTab, t_("Milling"));
+	tOperationSettings.Add(operationMillingTab, t_("Milling")).Disable();
 	
 	operationArrayTab.WhenAction =
 	operationRoundlessTab.WhenAction =
@@ -155,6 +155,8 @@ EasyCncCAM::EasyCncCAM() {
 	bShowCoordinates.SetStyle(viewer.GetDrawCoordinates() ? Button::StyleOk() : Button::StyleNormal());
 	bShowDrillCenters.SetStyle(viewer.GetDrawDrillCenter() ? Button::StyleOk() : Button::StyleNormal());
 	bShowMeasure.SetStyle(viewer.GetDrawMeasure() ? Button::StyleOk() : Button::StyleNormal());
+	
+	viewer.showAllView();
 }
 
 EasyCncCAM::~EasyCncCAM() {
