@@ -56,12 +56,22 @@ protected:
 		draw->DrawArc(rc, start, end, width, color);
 		draw->Alpha().DrawArc(rc, start, end, width, GrayColor(alpha));
 	}
+	void DrawMeasureArrow(int x, int y, double angle) {
+		double arrowSize = 20.;
+		double arrowAngle = M_PI/10.;
+		DrawAlphaPolygon({
+			{x, y},
+			{x + (int)(arrowSize * cos(angle - arrowAngle)), y + (int)(arrowSize * sin(angle - arrowAngle))},
+			{x + (int)(arrowSize * cos(angle + arrowAngle)), y + (int)(arrowSize * sin(angle + arrowAngle))}
+		}, Black);
+	}
 	void DrawMeasureDiameter(double x, double y, double diameter, double angle, const String& text = "") {
 		String str = text.IsEmpty() ? DblStr(diameter) : text;
 		Size textSize = GetTextSize(str, measureFont);
-		double radius = diameter / 2. + 2.;
-		double xD = radius * cos(angle * M_PI/180.);
-		double yD = radius * sin(angle * M_PI/180.);
+		double radius = diameter / 2.;
+		double anglePI = angle * M_PI/180.;
+		double xD = (radius + 2.) * cos(anglePI);
+		double yD = (radius + 2.) * sin(anglePI);
 		int leftAngle = (int)abs(angle) % 360;
 		bool leftText = leftAngle > 90 && leftAngle < 270;
 		DrawAlphaTextA(
@@ -80,13 +90,15 @@ protected:
 			(int)((x + xD - shiftDraw.x) * scale + (leftText ? -textSize.cx : textSize.cx)),
 			(int)((y - yD - shiftDraw.y) * scale),
 			1, Black());
+		DrawMeasureArrow((int)((x + radius * cos(anglePI) - shiftDraw.x) * scale), (int)((y - radius * sin(anglePI) - shiftDraw.y) * scale), -anglePI);
+		DrawMeasureArrow((int)((x - radius * cos(anglePI) - shiftDraw.x) * scale), (int)((y + radius * sin(anglePI) - shiftDraw.y) * scale), -anglePI + M_PI);
 	}
 	void DrawMeasureRadius(double x, double y, double radius, double angle, const String& text = "") {
 		String str = text.IsEmpty() ? DblStr(radius) : text;
 		Size textSize = GetTextSize(str, measureFont);
-		radius += 3.;
-		double xD = radius * cos(angle * M_PI/180.);
-		double yD = radius * sin(angle * M_PI/180.);
+		double anglePI = angle * M_PI/180.;
+		double xD = (radius + 5.) * cos(anglePI);
+		double yD = (radius + 5.) * sin(anglePI);
 		int leftAngle = (int)abs(angle) % 360;
 		bool leftText = leftAngle > 90 && leftAngle < 270;
 		DrawAlphaTextA(
@@ -105,6 +117,7 @@ protected:
 			(int)((x + xD - shiftDraw.x) * scale + (leftText ? -textSize.cx : textSize.cx)),
 			(int)((y - yD - shiftDraw.y) * scale),
 			1, Black());
+		DrawMeasureArrow((int)((x + radius * cos(anglePI) - shiftDraw.x) * scale), (int)((y - radius * sin(anglePI) - shiftDraw.y) * scale), -anglePI);
 	}
 	void DrawMeasureLine(int x1, int y1, int x2, int y2, const String& text = "") {
 		int pen = 1;
@@ -123,11 +136,15 @@ protected:
 		Size txtSz = GetTextSize(str, measureFont);
 		int sX = (int)(x1 + shiftL * cos(angle+M_PI_2));
 		int sY = (int)(y1 + shiftL * sin(angle+M_PI_2));
+		int eX = (int)(sX + len * cos(angle));
+		int eY = (int)(sY + len * sin(angle));
 		double txtShiftLen = (len - txtSz.cx) / 2.;
 		DrawAlphaTextA((int)(sX + txtShiftLen * cos(angle)), (int)(sY + txtShiftLen * sin(angle)), (int)(angle*-1800./M_PI), str, measureFont, Black);
-		DrawAlphaLine(sX, sY, (int)(sX + len * cos(angle)), (int)(sY + len * sin(angle)), pen, Black);
+		DrawAlphaLine(sX, sY, eX, eY, pen, Black);
 		DrawAlphaLine(x1, y1, (int)(x1 + shiftV * cos(angle+M_PI_2)), (int)(y1 + shiftV * sin(angle+M_PI_2)), pen, Black);
 		DrawAlphaLine(x2, y2, (int)(x2 + shiftV * cos(angle+M_PI_2)), (int)(y2 + shiftV * sin(angle+M_PI_2)), pen, Black);
+		DrawMeasureArrow(sX, sY, angle);
+		DrawMeasureArrow(eX, eY, angle + M_PI);
 	}
 public:
 	virtual ~Operation() {
