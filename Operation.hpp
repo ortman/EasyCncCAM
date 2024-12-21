@@ -84,7 +84,7 @@ protected:
 	void DrawMeasureRadius(double x, double y, double radius, double angle, const String& text = "") {
 		String str = text.IsEmpty() ? DblStr(radius) : text;
 		Size textSize = GetTextSize(str, measureFont);
-		radius += 2.;
+		radius += 3.;
 		double xD = radius * cos(angle * M_PI/180.);
 		double yD = radius * sin(angle * M_PI/180.);
 		int leftAngle = (int)abs(angle) % 360;
