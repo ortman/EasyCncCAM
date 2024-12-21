@@ -17,7 +17,6 @@ struct Tool : ValueType<Tool, 10013, Comparable<Tool, Moveable<Tool>>> {
 	double length;
 	double speed;
 //public:
-	static Vector<Tool> tools;
 	Tool() {}
 	Tool(Tool::Type t, double d, double l, double s) : type(t), diameter(d), length(l), speed(s) {}
 	Tool(const Value& v) {
@@ -102,8 +101,6 @@ struct Tool : ValueType<Tool, 10013, Comparable<Tool, Moveable<Tool>>> {
 	}
 	static dword ValueTypeNo() { return 10013; }
 };
-
-Vector<Tool> Tool::tools;
 
 INITBLOCK {
     Value::Register<Tool>();

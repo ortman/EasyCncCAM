@@ -94,7 +94,6 @@ public:
 	virtual void calculateDraw() {
 		OperationDrill::calculateDraw();
 		if (isDrawMeasure) {
-			int pen = 1;
 			if (sector > 0. && sector < 360.) {
 				double radiusArc = radius/2.;
 				Size ds = getDrawSize();
@@ -103,7 +102,7 @@ public:
 					(ds.cy+0.5)/2.
 				);
 				String textAngle = DblStr(sector) + "°";
-				Size textAngleSz = GetTextSize(textAngle, measureFont);
+				Size textAngleSz = GetTextSize(textAngle, Settings::measurersFont);
 				DrawAlphaArc(RectC(
 						(int)((c.x - radiusArc) * scale),
 						(int)((c.y - radiusArc) * scale),
@@ -118,21 +117,21 @@ public:
 						(int)((c.x + radiusArc * cos(startAngle * M_PI/180.)) * scale),
 						(int)((c.y + radiusArc * sin(startAngle * M_PI/180.)) * scale)
 					),
-					pen, Black
+					Settings::measurersLineWidth, Settings::measurersColor
 				);
 				DrawAlphaLine(
 					(int)(c.x * scale),
 					(int)(c.y * scale),
 					(int)((c.x + radius * cos((sector + startAngle) * M_PI/180.)) * scale),
 					(int)((c.y + radius * sin((sector + startAngle) * M_PI/180.)) * scale),
-					pen, Black
+					Settings::measurersLineWidth, Settings::measurersColor
 				);
 				DrawAlphaLine(
 					(int)(c.x * scale),
 					(int)(c.y * scale),
 					(int)((c.x + radius * cos(startAngle * M_PI/180.)) * scale),
 					(int)((c.y + radius * sin(startAngle * M_PI/180.)) * scale),
-					pen, Black
+					Settings::measurersLineWidth, Settings::measurersColor
 				);
 				DrawAlphaArc(RectC(
 						(int)((c.x - radius) * scale),
@@ -148,19 +147,19 @@ public:
 						(int)((c.x + radius * cos(startAngle * M_PI/180.)) * scale),
 						(int)((c.y + radius * sin(startAngle * M_PI/180.)) * scale)
 					),
-					pen, Black
+					Settings::measurersLineWidth, Settings::measurersColor
 				);
 				DrawMeasureRadius(center.x, center.y, radius, -startAngle - sector / 2.);
 				DrawAlphaTextA(
-					(int)((c.x + (radiusArc+2) * cos((-sector/2 - startAngle) * M_PI/180.)) * scale) - textAngleSz.cx/2.,
-					(int)((c.y + (radiusArc+2) * sin((sector/2. + startAngle) * M_PI/180.)) * scale) - textAngleSz.cy/2.,
-					0, textAngle, measureFont, Black);
+					(int)((c.x + (radiusArc+2) * cos((-sector/2 - startAngle) * M_PI/180.)) * scale - textAngleSz.cx/2.),
+					(int)((c.y + (radiusArc+2) * sin((sector/2. + startAngle) * M_PI/180.)) * scale - textAngleSz.cy/2.),
+					0, textAngle, Settings::measurersFont, Settings::measurersColor);
 			} else {
 				double delta = (tool.diameter + OPERATION_DRAW_OFFSET)/2.;
 				DrawAlphaEllipse(
 					(int)(delta * scale), (int)(delta * scale),
 					(int)((radius*2.) * scale), (int)((radius*2.) * scale),
-					Null, pen, Black());
+					Null, Settings::measurersLineWidth, Settings::measurersColor);
 				DrawMeasureRadius(center.x, center.y, radius, 45);
 			}
 		}
@@ -265,7 +264,7 @@ public:
 	}
 	void updateToolList() {
 		dlTool.Clear();
-		for (Tool &t : Tool::tools) {
+		for (Tool &t : Settings::tools) {
 			dlTool.Add(t, t.ToString());
 		}
 		if (operation != NULL) dlTool <<= operation->getTool();

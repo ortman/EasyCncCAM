@@ -27,20 +27,20 @@ protected:
 		for (Pointf pd : drills) {
 			x = (int)((pd.x - shiftDraw.x) * scale - radius);
 			y = (int)((pd.y - shiftDraw.y) * scale - radius);
-			DrawAlphaEllipse(x, y, (int)(diameter), (int)(diameter), Null, 2, Blue());
+			DrawAlphaEllipse(x, y, (int)(diameter), (int)(diameter), Null, Settings::drillLineWidth, Settings::drillColor);
 			if (isDrawDrillCenter) {
 				DrawAlphaLine(
 					(int)((pd.x - shiftDraw.x) * scale),
 					(int)((pd.y - shiftDraw.y - 3) * scale - radius),
 					(int)((pd.x - shiftDraw.x) * scale),
 					(int)((pd.y - shiftDraw.y + 3) * scale + radius),
-					1/*(drill < 20) ? pen : PEN_DASHDOT*/, LtRed());
+					Settings::measurersLineWidth, Settings::drillCenterColor);
 				DrawAlphaLine(
 					(int)((pd.x - shiftDraw.x - 3) * scale - radius),
 					(int)((pd.y - shiftDraw.y) * scale),
 					(int)((pd.x - shiftDraw.x + 3) * scale + radius),
 					(int)((pd.y - shiftDraw.y) * scale),
-					1/*(drill < 20) ? pen : PEN_DASHDOT*/, LtRed());
+					Settings::measurersLineWidth, Settings::drillCenterColor);
 			}
 		}
 		if (isDrawMeasure) {

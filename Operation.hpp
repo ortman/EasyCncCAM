@@ -20,7 +20,6 @@ protected:
 	Pointf shiftDraw = {0., 0.};
 	Tool tool;
 	bool isDrawMeasure = false;
-	static Font measureFont;
 		
 	void DrawAlphaLine(int x1, int y1, int x2, int y2, int width, Color color, int alpha = 255) {
 			draw->DrawLine(x1, y1, x2, y2, width, color);
@@ -38,7 +37,7 @@ protected:
 	}
 	void DrawAlphaTextA(int x, int y, int angle, const char *text, Font font = StdFont(),
 		          Color ink = DefaultInk(), int alpha = 255, int n = -1, const int *dx = NULL) {
-		Size sz = GetTextSize(text, measureFont);
+		Size sz = GetTextSize(text, font);
 		sz.cx += 2;
 		//sz.cy += 2;
 		double anglePI = angle * M_PI/-1800.;
@@ -57,17 +56,20 @@ protected:
 		draw->Alpha().DrawArc(rc, start, end, width, GrayColor(alpha));
 	}
 	void DrawMeasureArrow(int x, int y, double angle) {
-		double arrowSize = 20.;
-		double arrowAngle = M_PI/10.;
 		DrawAlphaPolygon({
 			{x, y},
-			{x + (int)(arrowSize * cos(angle - arrowAngle)), y + (int)(arrowSize * sin(angle - arrowAngle))},
-			{x + (int)(arrowSize * cos(angle + arrowAngle)), y + (int)(arrowSize * sin(angle + arrowAngle))}
-		}, Black);
+			{
+				x + (int)(Settings::measurersArrowSize * cos(angle - Settings::measurersArrowAngle)),
+				y + (int)(Settings::measurersArrowSize * sin(angle - Settings::measurersArrowAngle))
+			}, {
+				x + (int)(Settings::measurersArrowSize * cos(angle + Settings::measurersArrowAngle)),
+				y + (int)(Settings::measurersArrowSize * sin(angle + Settings::measurersArrowAngle))
+			}
+		}, Settings::measurersColor);
 	}
 	void DrawMeasureDiameter(double x, double y, double diameter, double angle, const String& text = "") {
 		String str = text.IsEmpty() ? DblStr(diameter) : text;
-		Size textSize = GetTextSize(str, measureFont);
+		Size textSize = GetTextSize(str, Settings::measurersFont);
 		double radius = diameter / 2.;
 		double anglePI = angle * M_PI/180.;
 		double xD = (radius + 30. / scale) * cos(anglePI);
@@ -77,25 +79,25 @@ protected:
 		DrawAlphaTextA(
 			(int)((x + xD - shiftDraw.x) * scale - (leftText ? textSize.cx : 0)),
 			(int)((y - yD - shiftDraw.y) * scale - textSize.cy),
-			0, str, measureFont, Black());
+			0, str, Settings::measurersFont, Settings::measurersColor);
 		DrawAlphaLine(
 			(int)((x - xD - shiftDraw.x) * scale),
 			(int)((y + yD - shiftDraw.y) * scale),
 			(int)((x + xD - shiftDraw.x) * scale),
 			(int)((y - yD - shiftDraw.y) * scale),
-			1, Black());
+			Settings::measurersLineWidth, Settings::measurersColor);
 		DrawAlphaLine(
 			(int)((x + xD - shiftDraw.x) * scale),
 			(int)((y - yD - shiftDraw.y) * scale),
 			(int)((x + xD - shiftDraw.x) * scale + (leftText ? -textSize.cx : textSize.cx)),
 			(int)((y - yD - shiftDraw.y) * scale),
-			1, Black());
+			Settings::measurersLineWidth, Settings::measurersColor);
 		DrawMeasureArrow((int)((x + radius * cos(anglePI) - shiftDraw.x) * scale), (int)((y - radius * sin(anglePI) - shiftDraw.y) * scale), -anglePI);
 		DrawMeasureArrow((int)((x - radius * cos(anglePI) - shiftDraw.x) * scale), (int)((y + radius * sin(anglePI) - shiftDraw.y) * scale), -anglePI + M_PI);
 	}
 	void DrawMeasureRadius(double x, double y, double radius, double angle, const String& text = "") {
 		String str = text.IsEmpty() ? DblStr(radius) : text;
-		Size textSize = GetTextSize(str, measureFont);
+		Size textSize = GetTextSize(str, Settings::measurersFont);
 		double anglePI = angle * M_PI/180.;
 		double xD = (radius + 30. / scale) * cos(anglePI);
 		double yD = (radius + 30. / scale) * sin(anglePI);
@@ -104,23 +106,22 @@ protected:
 		DrawAlphaTextA(
 			(int)((x + xD - shiftDraw.x) * scale - (leftText ? textSize.cx : -1)),
 			(int)((y - yD - shiftDraw.y) * scale - textSize.cy),
-			0, str, measureFont, Black());
+			0, str, Settings::measurersFont, Settings::measurersColor);
 		DrawAlphaLine(
 			(int)((x - shiftDraw.x) * scale),
 			(int)((y - shiftDraw.y) * scale),
 			(int)((x + xD - shiftDraw.x) * scale),
 			(int)((y - yD - shiftDraw.y) * scale),
-			1, Black());
+			Settings::measurersLineWidth, Settings::measurersColor);
 		DrawAlphaLine(
 			(int)((x + xD - shiftDraw.x) * scale),
 			(int)((y - yD - shiftDraw.y) * scale),
 			(int)((x + xD - shiftDraw.x) * scale + (leftText ? -textSize.cx : textSize.cx)),
 			(int)((y - yD - shiftDraw.y) * scale),
-			1, Black());
+			Settings::measurersLineWidth, Settings::measurersColor);
 		DrawMeasureArrow((int)((x + radius * cos(anglePI) - shiftDraw.x) * scale), (int)((y - radius * sin(anglePI) - shiftDraw.y) * scale), -anglePI);
 	}
 	void DrawMeasureLine(int x1, int y1, int x2, int y2, const String& text = "") {
-		int pen = 1;
 		double shiftV = tool.diameter * scale * 0.8;
 		double shiftL = shiftV * 0.8;
 		double cx = x2 - x1;
@@ -133,16 +134,16 @@ protected:
 		} else {
 			str = text;
 		}
-		Size txtSz = GetTextSize(str, measureFont);
+		Size txtSz = GetTextSize(str, Settings::measurersFont);
 		int sX = (int)(x1 + shiftL * cos(angle+M_PI_2));
 		int sY = (int)(y1 + shiftL * sin(angle+M_PI_2));
 		int eX = (int)(sX + len * cos(angle));
 		int eY = (int)(sY + len * sin(angle));
 		double txtShiftLen = (len - txtSz.cx) / 2.;
-		DrawAlphaTextA((int)(sX + txtShiftLen * cos(angle)), (int)(sY + txtShiftLen * sin(angle)), (int)(angle*-1800./M_PI), str, measureFont, Black);
-		DrawAlphaLine(sX, sY, eX, eY, pen, Black);
-		DrawAlphaLine(x1, y1, (int)(x1 + shiftV * cos(angle+M_PI_2)), (int)(y1 + shiftV * sin(angle+M_PI_2)), pen, Black);
-		DrawAlphaLine(x2, y2, (int)(x2 + shiftV * cos(angle+M_PI_2)), (int)(y2 + shiftV * sin(angle+M_PI_2)), pen, Black);
+		DrawAlphaTextA((int)(sX + txtShiftLen * cos(angle)), (int)(sY + txtShiftLen * sin(angle)), (int)(angle*-1800./M_PI), str, Settings::measurersFont, Settings::measurersColor);
+		DrawAlphaLine(sX, sY, eX, eY, Settings::measurersLineWidth, Settings::measurersColor);
+		DrawAlphaLine(x1, y1, (int)(x1 + shiftV * cos(angle+M_PI_2)), (int)(y1 + shiftV * sin(angle+M_PI_2)), Settings::measurersLineWidth, Settings::measurersColor);
+		DrawAlphaLine(x2, y2, (int)(x2 + shiftV * cos(angle+M_PI_2)), (int)(y2 + shiftV * sin(angle+M_PI_2)), Settings::measurersLineWidth, Settings::measurersColor);
 		DrawMeasureArrow(sX, sY, angle);
 		DrawMeasureArrow(eX, eY, angle + M_PI);
 	}
@@ -177,8 +178,6 @@ public:
 		calculateDraw();
 	}
 };
-
-Font Operation::measureFont = StdFont(20);
 
 double Operation::scale = OPERATION_SCALE;
 

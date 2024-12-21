@@ -52,6 +52,8 @@ EasyCncCAM::EasyCncCAM() {
 				bShowMeasure.SetStyle(enabled ? Button::StyleOk() : Button::StyleNormal());
 			});
 		});
+		bar.Add(t_("Settings"), [=] {
+		});
 	});
 	
 	bShowAll.WhenAction = [=] {
@@ -65,8 +67,8 @@ EasyCncCAM::EasyCncCAM() {
 			o->setTool(currentOperation->getTool());
 			OperationDrill* od = dynamic_cast<OperationDrill*>(currentOperation);
 			if (od != NULL) o->setDepth(od->getDepth());
-		} else if (Tool::tools.GetCount() > 0) {
-			o->setTool(Tool::tools[0]);
+		} else if (Settings::tools.GetCount() > 0) {
+			o->setTool(Settings::tools[0]);
 		}
 		
 		o->setDrawDrillCenter(viewer.GetDrawDrillCenter());
@@ -129,9 +131,9 @@ EasyCncCAM::EasyCncCAM() {
 		operationMillingTab.updateToolList();
 	};
 
-	if (Tool::tools.GetCount() > 0) {
+	if (Settings::tools.GetCount() > 0) {
 		OperationDrillArray *op = new OperationDrillArray();
-		op->setTool(Tool::tools[0]);
+		op->setTool(Settings::tools[0]);
 		op->setDrawMeasure(viewer.GetDrawMeasure());
 		op->setDrawDrillCenter(viewer.GetDrawDrillCenter());
 		currentOperation = op;
