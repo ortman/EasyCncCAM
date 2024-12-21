@@ -14,14 +14,14 @@ private:
 		drills.clear();
 		double shiftAngle;
 		if (sector < 360. && count > 1) {
-			shiftAngle = M_2PI * sector / 360. / (count- 1);
+			shiftAngle = M_2PI * sector / 360. / (count - 1);
 		} else {
 			shiftAngle = M_2PI / count;
 		}
 		for (int i=0; i<count; ++i) {
 			drills.Add({
-				center.x + radius * cos(startAngle * M_PI/180 + shiftAngle*i),
-				center.y + radius * sin(startAngle * M_PI/180 + shiftAngle*i)
+				center.x + radius * cos(startAngle * M_PI/180. + shiftAngle*i),
+				center.y + radius * sin(startAngle * M_PI/180. + shiftAngle*i)
 			});
 		}
 		calculateDraw();

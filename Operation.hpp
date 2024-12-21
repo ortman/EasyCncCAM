@@ -70,8 +70,8 @@ protected:
 		Size textSize = GetTextSize(str, measureFont);
 		double radius = diameter / 2.;
 		double anglePI = angle * M_PI/180.;
-		double xD = (radius + 2.) * cos(anglePI);
-		double yD = (radius + 2.) * sin(anglePI);
+		double xD = (radius + 30. / scale) * cos(anglePI);
+		double yD = (radius + 30. / scale) * sin(anglePI);
 		int leftAngle = (int)abs(angle) % 360;
 		bool leftText = leftAngle > 90 && leftAngle < 270;
 		DrawAlphaTextA(
@@ -97,8 +97,8 @@ protected:
 		String str = text.IsEmpty() ? DblStr(radius) : text;
 		Size textSize = GetTextSize(str, measureFont);
 		double anglePI = angle * M_PI/180.;
-		double xD = (radius + 5.) * cos(anglePI);
-		double yD = (radius + 5.) * sin(anglePI);
+		double xD = (radius + 30. / scale) * cos(anglePI);
+		double yD = (radius + 30. / scale) * sin(anglePI);
 		int leftAngle = (int)abs(angle) % 360;
 		bool leftText = leftAngle > 90 && leftAngle < 270;
 		DrawAlphaTextA(
@@ -121,8 +121,8 @@ protected:
 	}
 	void DrawMeasureLine(int x1, int y1, int x2, int y2, const String& text = "") {
 		int pen = 1;
-		double shiftV = 30.;
-		double shiftL = 20.;
+		double shiftV = tool.diameter * scale * 0.8;
+		double shiftL = shiftV * 0.8;
 		double cx = x2 - x1;
 		double cy = y2 - y1;
 		double angle = atan(cy/cx);

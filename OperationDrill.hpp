@@ -21,9 +21,9 @@ protected:
 		//draw->Alpha().DrawRect({0, 0, (int)(imgSize.cx), (int)(imgSize.cy)}, GrayColor(100));
 		//draw->DrawRect({0, 0, (int)(imgSize.cx), (int)(imgSize.cy)}, LtGreen());
 
-		double diameter = (tool.diameter + 1) * scale;
-		double radius = diameter / 2;
-		int x,y;
+		double diameter = tool.diameter * scale;
+		double radius = diameter / 2.;
+		int x, y;
 		for (Pointf pd : drills) {
 			x = (int)((pd.x - shiftDraw.x) * scale - radius);
 			y = (int)((pd.y - shiftDraw.y) * scale - radius);
@@ -46,7 +46,7 @@ protected:
 		if (isDrawMeasure) {
 			if (drills.GetCount() > 0) {
 				Pointf &d = drills[0];
-				DrawMeasureDiameter(d.x, d.y, tool.diameter, 45);
+				DrawMeasureDiameter(d.x, d.y, tool.diameter, 45.);
 			}
 		}
 	}
