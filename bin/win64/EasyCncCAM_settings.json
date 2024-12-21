@@ -1,0 +1,52 @@
+{
+	"tools": [
+		{
+			"type": "Drill",
+			"diameter": 3.2,
+			"length": 20,
+			"speed": 6000
+		},
+		{
+			"type": "Drill",
+			"diameter": 1.5,
+			"length": 20,
+			"speed": 6000
+		},
+		{
+			"type": "Drill",
+			"diameter": 2.2,
+			"length": 20,
+			"speed": 6000
+		},
+		{
+			"type": "Drill",
+			"diameter": 4,
+			"length": 30,
+			"speed": 6000
+		},
+		{
+			"type": "Mill",
+			"diameter": 2,
+			"length": 5,
+			"speed": 20000
+		},
+		{
+			"type": "Mill",
+			"diameter": 4,
+			"length": 6,
+			"speed": 20000
+		},
+		{
+			"type": "Mill",
+			"diameter": 6,
+			"length": 10,
+			"speed": 20000
+		},
+		{
+			"type": "Mill",
+			"diameter": 8,
+			"length": 20,
+			"speed": 20000
+		}
+	]
+}
