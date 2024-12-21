@@ -86,7 +86,7 @@ public:
 	}
 	void updateToolList() {
 		dlTool.Clear();
-		for (Tool &t : Tool::tools) {
+		for (Tool &t : Settings::tools) {
 			dlTool.Add(t, t.ToString());
 		}
 		if (operation != NULL) dlTool <<= operation->getTool();

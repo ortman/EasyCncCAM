@@ -91,10 +91,10 @@ public:
 		};
 		
 		bOk.WhenPush = [=] {
-			Tool::tools.Clear();
+			Settings::tools.Clear();
 			int cnt = clTools.GetCount();
 			for (int i = 0; i < cnt; ++i) {
-				Tool::tools.Add(clTools.GetValue(i));
+				Settings::tools.Add(clTools.GetValue(i));
 			}
 			Settings::Save();
 			Close();
@@ -112,7 +112,7 @@ public:
 	
 	int Run(bool appmodal = false) {
 		clTools.Clear();
-		for (Tool t : Tool::tools) {
+		for (Tool t : Settings::tools) {
 			clTools.Add(t);
 		}
 		if (clTools.GetCount() > 0) clTools.SetCursor(0);

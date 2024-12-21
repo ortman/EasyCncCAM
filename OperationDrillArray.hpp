@@ -81,12 +81,11 @@ public:
 	virtual void calculateDraw() {
 		OperationDrill::calculateDraw();
 		if (isDrawMeasure) {
-			double delta = (tool.diameter + OPERATION_DRAW_OFFSET)/2;
-			int pen = 1;
+			double delta = (tool.diameter + OPERATION_DRAW_OFFSET) / 2.;
 			int xLeft = (int)(delta * scale);
 			int xRight = (int)((size.cx+delta) * scale);
 			int yTop = (int)(delta * scale);
-			int yBottom = (int)((((count.cy > 1) ? size.cy : size.cy / 2 ) + delta) * scale);
+			int yBottom = (int)((((count.cy > 1) ? size.cy : size.cy / 2. ) + delta) * scale);
 			if (count.cx > 1) {
 				DrawMeasureLine(xLeft, yBottom, xRight, yBottom, DblStr(size.cx));
 				if (count.cy > 1) {
@@ -95,7 +94,7 @@ public:
 						{xRight, yTop},
 						{xRight, yBottom},
 						{xLeft, yBottom}},
-						Null, pen, Black());
+						Null, Settings::measurersLineWidth, Settings::measurersColor);
 					//DrawMeasureLine(xLeft, yBottom, xRight, yTop);
 				}
 			}
@@ -210,7 +209,7 @@ public:
 	}
 	void updateToolList() {
 		dlTool.Clear();
-		for (Tool &t : Tool::tools) {
+		for (Tool &t : Settings::tools) {
 			dlTool.Add(t, t.ToString());
 		}
 		if (operation != NULL) dlTool <<= operation->getTool();
