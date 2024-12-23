@@ -7,6 +7,7 @@
 #include <CtrlCore/lay.h>
 #include "Tool.hpp"
 #include "Settings.hpp"
+#include "GCode.h"
 
 using namespace Upp;
 
@@ -176,6 +177,9 @@ public:
 	void setDrawMeasure(bool isDraw = true) {
 		isDrawMeasure = isDraw;
 		calculateDraw();
+	}
+	virtual const String gcode(GCode *g) {
+		return "";
 	}
 };
 

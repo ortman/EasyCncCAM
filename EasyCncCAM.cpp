@@ -1,4 +1,5 @@
 #include "EasyCncCAM.h"
+#include "GCodeGenerator.hpp"
 
 EasyCncCAM::EasyCncCAM() {
 	CtrlLayout(*this, "Easy CNC CAM");
@@ -159,9 +160,12 @@ EasyCncCAM::EasyCncCAM() {
 	clOperations.SetCursor(clOperations.GetCount()-1);
 	
 	bGenerate.WhenPush = [=] {
-		if (sel.ExecuteSaveAs()) {
-			ErrorOK("Oops(. This functionality is not exist!");
-		}
+		//if (sel.ExecuteSaveAs()) {
+			GCode* g = new GCodeMach3();
+			String out = GCodeGenerator::Generate(operations, g);
+			LOG(out);
+			//ErrorOK("Oops(. This functionality is not exist!");
+		//}
 	};
 	bShowCoordinates.SetStyle(viewer.GetDrawCoordinates() ? Button::StyleOk() : Button::StyleNormal());
 	bShowDrillCenters.SetStyle(viewer.GetDrawDrillCenter() ? Button::StyleOk() : Button::StyleNormal());

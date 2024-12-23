@@ -39,6 +39,9 @@ public:
 	virtual String ToString() {
 		return String(t_("Milling")) + "(" + DblStr(tool.diameter) + " x " + DblStr(depth) + ")";
 	}
+	virtual const String gcode(GCode *g) {
+		return "";
+	}
 };
 
 class OperationMillingTab : public WithOperationMilling<ParentCtrl> {
