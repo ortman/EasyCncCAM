@@ -40,23 +40,23 @@ EasyCncCAM::EasyCncCAM() {
 			});
 		});
 		bar.Sub(t_("View"), [=](Bar &bar) {
-			bar.Add(t_("Show drill centers"), [=] {
-				bool enabled = !viewer.GetDrawDrillCenter();
-				viewer.SetDrawDrillCenter(enabled);
-				bShowDrillCenters.SetStyle(enabled ? Button::StyleOk() : Button::StyleNormal());
-			}).Check(viewer.GetDrawDrillCenter());
 			bar.Add(t_("Show coordinate axis"), [=] {
 				bool enabled = !viewer.GetDrawCoordinates();
 				viewer.SetDrawCoordinates(enabled);
 				bShowCoordinates.SetStyle(enabled ? Button::StyleOk() : Button::StyleNormal());
 			}).Check(viewer.GetDrawCoordinates());
+			bar.Add(t_("Show drill centers"), [=] {
+				bool enabled = !viewer.GetDrawDrillCenter();
+				viewer.SetDrawDrillCenter(enabled);
+				bShowDrillCenters.SetStyle(enabled ? Button::StyleOk() : Button::StyleNormal());
+			}).Check(viewer.GetDrawDrillCenter());
 			bar.Add(t_("Show measurers"), [=] {
 				bool enabled = !viewer.GetDrawMeasure();
 				viewer.SetDrawMeasure(enabled);
 				bShowMeasure.SetStyle(enabled ? Button::StyleOk() : Button::StyleNormal());
 			}).Check(viewer.GetDrawMeasure());
 		});
-		bar.Add(t_("Settings"), [=] {
+		bar.Add(false, t_("Settings"), [=] {
 		});
 	});
 	
