@@ -90,8 +90,8 @@ public:
 				double radiusArc = radius/2.;
 				Size ds = getDrawSize();
 				Pointf c = Pointf(
-					(ds.cx+0.5)/2.,
-					(ds.cy+0.5)/2.
+					center.x - shiftDraw.x,
+					center.y - shiftDraw.y
 				);
 				String textAngle = DblStr(sector) + "°";
 				Size textAngleSz = GetTextSize(textAngle, Settings::measurersFont);
