@@ -1,17 +1,152 @@
+#ifndef _OPERATION_H_
+#define _OPERATION_H_
+
 #include <Core/Core.h>
 
 #define LAYOUTFILE <EasyCncCAM/OperationTab.lay>
 #include <CtrlCore/lay.h>
+#include "Tool.hpp"
+#include "Settings.hpp"
 
 using namespace Upp;
 
 #define OPERATION_SCALE 1.5
+#define OPERATION_DRAW_OFFSET 30.
 
 class Operation : public Moveable<Operation> {
 protected:
 	ImageDraw *draw = NULL;
 	static double scale;
-	Pointf shiftDraw;
+	Pointf shiftDraw = {0., 0.};
+	Tool tool;
+	bool isDrawMeasure = false;
+		
+	void DrawAlphaLine(int x1, int y1, int x2, int y2, int width, Color color, int alpha = 255) {
+			draw->DrawLine(x1, y1, x2, y2, width, color);
+			draw->Alpha().DrawLine(x1, y1, x2, y2, width, GrayColor(alpha));
+	}
+	void DrawAlphaEllipse(int x, int y, int cx, int cy, Color color, int pen, Color pencolor, int alpha = 255) {
+		draw->DrawEllipse(x, y, cx, cy, color, pen, pencolor);
+		draw->Alpha().DrawEllipse(x, y, cx, cy, color, pen, GrayColor(alpha));
+	}
+	void DrawAlphaPolygon(const Vector<Point>& vertices,
+			Color color = DefaultInk(), int width = 0, Color outline = Null, int alpha = 255,
+			uint64 pattern = 0, Color doxor = Null) {
+		draw->DrawPolygon(vertices, color, width, outline, pattern, doxor);
+		draw->Alpha().DrawPolygon(vertices, color.IsNullInstance() ? Null : GrayColor(alpha), width, outline.IsNullInstance() ? Null : GrayColor(alpha), pattern, doxor);
+	}
+	void DrawAlphaTextA(int x, int y, int angle, const char *text, Font font = StdFont(),
+		          Color ink = DefaultInk(), int alpha = 255, int n = -1, const int *dx = NULL) {
+		Size sz = GetTextSize(text, font);
+		sz.cx += 2;
+		//sz.cy += 2;
+		double anglePI = angle * M_PI/-1800.;
+		int xx = x + (int)((sz.cx) * cos(anglePI + M_PI_2));
+		int yy = y + (int)((sz.cy) * sin(anglePI + M_PI_2));
+		DrawAlphaPolygon({
+			{x, y},
+			{x + (int)round(sz.cx * cos(anglePI)), y + (int)round(sz.cx * sin(anglePI))},
+			{xx + (int)round(sz.cx * cos(anglePI)), yy + (int)round(sz.cx * sin(anglePI))},
+			{xx, yy}
+		}, Settings::viewerBG);
+		draw->DrawTextA(x, y, angle, text, font, ink, n, dx);
+	}
+	void DrawAlphaArc(const Rect& rc, Point start, Point end, int width, Color color, int alpha = 255) {
+		draw->DrawArc(rc, start, end, width, color);
+		draw->Alpha().DrawArc(rc, start, end, width, GrayColor(alpha));
+	}
+	void DrawMeasureArrow(int x, int y, double angle) {
+		DrawAlphaPolygon({
+			{x, y},
+			{
+				x + (int)(Settings::measurersArrowSize * cos(angle - Settings::measurersArrowAngle)),
+				y + (int)(Settings::measurersArrowSize * sin(angle - Settings::measurersArrowAngle))
+			}, {
+				x + (int)(Settings::measurersArrowSize * cos(angle + Settings::measurersArrowAngle)),
+				y + (int)(Settings::measurersArrowSize * sin(angle + Settings::measurersArrowAngle))
+			}
+		}, Settings::measurersColor);
+	}
+	void DrawMeasureDiameter(double x, double y, double diameter, double angle = 45., const String& text = "") {
+		String str = text.IsEmpty() ? ("Ø" + DblStr(diameter)) : text;
+		Size textSize = GetTextSize(str, Settings::measurersFont);
+		double radius = diameter / 2.;
+		double anglePI = angle * M_PI/180.;
+		double xD = (radius + 30. / scale) * cos(anglePI);
+		double yD = (radius + 30. / scale) * sin(anglePI);
+		int leftAngle = (int)abs(angle) % 360;
+		bool leftText = leftAngle > 90 && leftAngle < 270;
+		DrawAlphaTextA(
+			(int)((x + xD - shiftDraw.x) * scale - (leftText ? textSize.cx : 0)),
+			(int)((y - yD - shiftDraw.y) * scale - textSize.cy),
+			0, str, Settings::measurersFont, Settings::measurersColor);
+		DrawAlphaLine(
+			(int)((x - xD - shiftDraw.x) * scale),
+			(int)((y + yD - shiftDraw.y) * scale),
+			(int)((x + xD - shiftDraw.x) * scale),
+			(int)((y - yD - shiftDraw.y) * scale),
+			Settings::measurersLineWidth, Settings::measurersColor);
+		DrawAlphaLine(
+			(int)((x + xD - shiftDraw.x) * scale),
+			(int)((y - yD - shiftDraw.y) * scale),
+			(int)((x + xD - shiftDraw.x) * scale + (leftText ? -textSize.cx : textSize.cx)),
+			(int)((y - yD - shiftDraw.y) * scale),
+			Settings::measurersLineWidth, Settings::measurersColor);
+		DrawMeasureArrow((int)((x + radius * cos(anglePI) - shiftDraw.x) * scale), (int)((y - radius * sin(anglePI) - shiftDraw.y) * scale), -anglePI);
+		DrawMeasureArrow((int)((x - radius * cos(anglePI) - shiftDraw.x) * scale), (int)((y + radius * sin(anglePI) - shiftDraw.y) * scale), -anglePI + M_PI);
+	}
+	void DrawMeasureRadius(double x, double y, double radius, double angle = 45., const String& text = "") {
+		String str = text.IsEmpty() ? ("R" + DblStr(radius)) : text;
+		Size textSize = GetTextSize(str, Settings::measurersFont);
+		double anglePI = angle * M_PI/180.;
+		double xD = (radius + 30. / scale) * cos(anglePI);
+		double yD = (radius + 30. / scale) * sin(anglePI);
+		int leftAngle = (int)abs(angle) % 360;
+		bool leftText = leftAngle > 90 && leftAngle < 270;
+		DrawAlphaTextA(
+			(int)((x + xD - shiftDraw.x) * scale - (leftText ? textSize.cx : -1)),
+			(int)((y - yD - shiftDraw.y) * scale - textSize.cy),
+			0, str, Settings::measurersFont, Settings::measurersColor);
+		DrawAlphaLine(
+			(int)((x - shiftDraw.x) * scale),
+			(int)((y - shiftDraw.y) * scale),
+			(int)((x + xD - shiftDraw.x) * scale),
+			(int)((y - yD - shiftDraw.y) * scale),
+			Settings::measurersLineWidth, Settings::measurersColor);
+		DrawAlphaLine(
+			(int)((x + xD - shiftDraw.x) * scale),
+			(int)((y - yD - shiftDraw.y) * scale),
+			(int)((x + xD - shiftDraw.x) * scale + (leftText ? -textSize.cx : textSize.cx)),
+			(int)((y - yD - shiftDraw.y) * scale),
+			Settings::measurersLineWidth, Settings::measurersColor);
+		DrawMeasureArrow((int)((x + radius * cos(anglePI) - shiftDraw.x) * scale), (int)((y - radius * sin(anglePI) - shiftDraw.y) * scale), -anglePI);
+	}
+	void DrawMeasureLine(int x1, int y1, int x2, int y2, const String& text = "") {
+		double shiftV = tool.diameter * scale * 0.8;
+		double shiftL = shiftV * 0.8;
+		double cx = x2 - x1;
+		double cy = y2 - y1;
+		double angle = atan(cy/cx);
+		double len = sqrt(sqr(cx) + sqr(cy));
+		String str;
+		if (text.IsEmpty()) {
+			str = DblStr(round(len / scale));
+		} else {
+			str = text;
+		}
+		Size txtSz = GetTextSize(str, Settings::measurersFont);
+		int sX = (int)(x1 + shiftL * cos(angle+M_PI_2));
+		int sY = (int)(y1 + shiftL * sin(angle+M_PI_2));
+		int eX = (int)(sX + len * cos(angle));
+		int eY = (int)(sY + len * sin(angle));
+		double txtShiftLen = (len - txtSz.cx) / 2.;
+		DrawAlphaTextA((int)(sX + txtShiftLen * cos(angle)), (int)(sY + txtShiftLen * sin(angle)), (int)(angle*-1800./M_PI), str, Settings::measurersFont, Settings::measurersColor);
+		DrawAlphaLine(sX, sY, eX, eY, Settings::measurersLineWidth, Settings::measurersColor);
+		DrawAlphaLine(x1, y1, (int)(x1 + shiftV * cos(angle+M_PI_2)), (int)(y1 + shiftV * sin(angle+M_PI_2)), Settings::measurersLineWidth, Settings::measurersColor);
+		DrawAlphaLine(x2, y2, (int)(x2 + shiftV * cos(angle+M_PI_2)), (int)(y2 + shiftV * sin(angle+M_PI_2)), Settings::measurersLineWidth, Settings::measurersColor);
+		DrawMeasureArrow(sX, sY, angle);
+		DrawMeasureArrow(eX, eY, angle + M_PI);
+	}
 public:
 	virtual ~Operation() {
 		if (draw) delete draw;
@@ -28,514 +163,22 @@ public:
 	}
 	virtual void calculateDraw() {
 	}
+	virtual void calculate() {
+	}
+	Tool& getTool() {
+		return tool;
+	}
+	void setTool(const Tool& tool) {
+		this->tool = tool;
+		calculate();
+	}
+	bool getDrawMeasure() { return isDrawMeasure; }
+	void setDrawMeasure(bool isDraw = true) {
+		isDrawMeasure = isDraw;
+		calculateDraw();
+	}
 };
 
 double Operation::scale = OPERATION_SCALE;
 
-//class OperationMilling;
-class OperationDrill : public Operation {
-protected:
-	Vector<Pointf> drills;
-	double drill = 10.;
-	double depth = 0.1;
-	Pointf center = {0., -0.};
-	bool isDrawDrillCenter = false;
-	OperationDrill(){};
-	
-	void calculateDraw() {
-		Sizef size = getDrawSize();
-		this->shiftDraw = {center.x - size.cx/2, center.y - size.cy/2};
-		Size imgSize = {(int)(size.cx * scale), (int)(size.cy * scale)};
-		if (draw) delete draw;
-		draw = new ImageDraw(imgSize);
-		if (draw == NULL) return;
-		draw->Alpha().DrawRect({0, 0, (int)(imgSize.cx), (int)(imgSize.cy)}, GrayColor(0));
-
-		double diameter = (drill + 1) * scale;
-		double radius = diameter / 2;
-		int pen = 1;
-		int x,y;
-		for (Pointf pd : drills) {
-			x = (int)((pd.x - shiftDraw.x) * scale - radius);
-			y = (int)((pd.y - shiftDraw.y) * scale - radius);
-			draw->DrawEllipse(x, y, (int)(diameter), (int)(diameter), Null, pen, Blue());
-			draw->Alpha().DrawEllipse(x, y, (int)(diameter), (int)(diameter), Null, pen, GrayColor(255));
-			if (isDrawDrillCenter) {
-				draw->DrawLine(
-					(int)((pd.x - shiftDraw.x) * scale),
-					(int)((pd.y - shiftDraw.y - 3) * scale - radius),
-					(int)((pd.x - shiftDraw.x) * scale),
-					(int)((pd.y - shiftDraw.y + 3) * scale + radius),
-					pen/*(drill < 20) ? pen : PEN_DASHDOT*/, LtRed());
-				draw->DrawLine(
-					(int)((pd.x - shiftDraw.x - 3) * scale - radius),
-					(int)((pd.y - shiftDraw.y) * scale),
-					(int)((pd.x - shiftDraw.x + 3) * scale + radius),
-					(int)((pd.y - shiftDraw.y) * scale),
-					pen/*(drill < 20) ? pen : PEN_DASHDOT*/, LtRed());
-				draw->Alpha().DrawLine(
-					(int)((pd.x - shiftDraw.x) * scale),
-					(int)((pd.y - shiftDraw.y - 3) * scale - radius),
-					(int)((pd.x - shiftDraw.x) * scale),
-					(int)((pd.y - shiftDraw.y + 3) * scale + radius),
-					pen/*(drill < 20) ? pen : PEN_DASHDOT*/, GrayColor(255));
-				draw->Alpha().DrawLine(
-					(int)((pd.x - shiftDraw.x - 3) * scale - radius),
-					(int)((pd.y - shiftDraw.y) * scale),
-					(int)((pd.x - shiftDraw.x + 3) * scale + radius),
-					(int)((pd.y - shiftDraw.y) * scale),
-					pen/*(drill < 20) ? pen : PEN_DASHDOT*/, GrayColor(255));
-			}
-		}
-	}
-	
-public:
-	
-	OperationDrill(Operation* operation) {
-		OperationDrill *dr = dynamic_cast<OperationDrill*>(operation);
-		if (dr) {
-			drill = dr->drill;
-			depth = dr->depth;
-			center = dr->center;
-			isDrawDrillCenter = dr->isDrawDrillCenter;
-		} else {
-//			OperationMilling *ml = dynamic_cast<OperationMilling*>(operation);
-//			if (ml) {
-//				drill = ml->getTool();
-//				depth = ml->getDepth();
-//			}
-		}
-	}
-
-	
-	~OperationDrill(){};
-	
-	Pointf getCenter() {return center;}
-	void setCenter(const Pointf p) {
-		center = p;
-		calculateDrills();
-	}
-	
-	Vector<Pointf>& getDrills() {return drills;}
-	
-	double getDrill() {return drill;}
-	
-	void setDrill(double d) {
-		drill = d;
-		calculateDraw();
-	}
-	
-	double getDepth() {return depth;}
-	
-	void setDepth(double d) {depth = d;}
-		
-	virtual void calculateDrills() {};
-	
-	bool getDrawDrillCenter() {return isDrawDrillCenter;}
-	void setDrawDrillCenter(bool b) {
-		isDrawDrillCenter = b;
-		calculateDraw();
-	}
-	
-//	virtual Sizef getDrawSize() {
-//		return {1., 1.};
-//	}
-	
-	virtual String ToString() {
-		return String(t_("Drill(")) + DblStr(drill) + "x" + DblStr(depth) + ")";
-	}
-	
-};
-
-class OperationDrillArray : public OperationDrill {
-	Sizef size;
-	Size count;
-	
-private:
-	void calculateDrills() {
-		drills.clear();
-		double sx, sy, startX, startY;
-		if (count.cx > 1) {
-			sx = size.cx / (count.cx-1);
-			startX = center.x - size.cx/2;
-		} else {
-			sx = 0;
-			startX = center.x;
-		}
-		if (count.cy > 1) {
-			sy = size.cy / (count.cy-1);
-			startY = center.y - size.cy/2;
-		} else {
-			sy = 0;
-			startY = center.y;
-		}
-		for (int x = 0; x < count.cx; ++x) {
-			for (int y = 0; y < count.cy; ++y) {
-				drills.Add({startX + x * sx, startY + y * sy});
-			}
-		}
-		calculateDraw();
-	}
-	
-public:
-	OperationDrillArray() {
-		size = {100., 50.};
-		count = {3, 2};
-		calculateDrills();
-	}
-	
-	OperationDrillArray(Operation *operation) : OperationDrill(operation) {
-		size = {100., 50.};
-		count = {3, 2};
-		calculateDrills();
-	}
-	
-	OperationDrillArray(Pointf center, Sizef size, Size count) {
-		setArray(center, size, count);
-	}
-	
-	Sizef getSize() {return size;}
-	void setSize(const Sizef s) {
-		size = s;
-		calculateDrills();
-	}
-	
-	Size getCount() {return count;}
-	void setCount(const Size c) {
-		count = c;
-		calculateDrills();
-	}
-	
-	void setArray(Pointf center, Sizef size, Size count) {
-		if (count.cx <= 0 || count.cy <= 0 || size.cx < 0. || size.cy < 0.) return;
-		this->center = center;
-		this->size = size;
-		this->count = count;
-		calculateDrills();
-	}
-	
-	Sizef getDrawSize() {
-		return {size.cx + drill + 7., size.cy + drill + 7.};
-	}
-	
-	virtual String ToString() {
-		return String(t_("DrillArray(")) + DblStr(drill) + " x " + DblStr(depth) + t_(") Array: ") + count.ToString();
-	}
-};
-
-class OperationDrillRoundless : public OperationDrill {
-private:
-	double radius;
-	int count;
-	double startAngle;
-	
-	void calculateDrills() {
-		drills.clear();
-		double shiftAngle = M_2PI / count;
-		for (int i=0; i<count; ++i) {
-			drills.Add({
-				center.x + radius * cos(startAngle * M_PI/180 + shiftAngle*i),
-				center.y + radius * sin(startAngle * M_PI/180 + shiftAngle*i)
-			});
-		}
-		calculateDraw();
-	}
-	
-public:
-	OperationDrillRoundless() {
-		radius = 50.;
-		count = 6;
-		startAngle = 0.;
-		calculateDrills();
-	}
-	
-	OperationDrillRoundless(Operation *operation) : OperationDrill(operation) {
-		radius = 50.;
-		count = 6;
-		startAngle = 0.;
-		calculateDrills();
-	}
-	
-	OperationDrillRoundless(Pointf center, double radius, int count, double startAngle) {
-		setRoundless(center, radius, count, startAngle);
-	};
-	
-	double getRadius() {return radius;}
-	void setRadius(const double r) {
-		radius = r;
-		calculateDrills();
-	}
-	
-	int getCount() {return count;}
-	void setCount(const int c) {
-		count = c;
-		calculateDrills();
-	}
-	
-	double getStartAngle() {return startAngle;}
-	void setStartAngle(const double a) {
-		startAngle = a;
-		calculateDrills();
-	}
-	
-	void setRoundless(Pointf center, double radius, int count, double startAngle) {
-		if (radius <= 0. || count <= 0) return;
-		this->center = center;
-		this->radius = radius;
-		this->count = count;
-		this->startAngle = startAngle;
-		calculateDrills();
-	}
-	
-	Sizef getDrawSize() {
-		double width = radius * 2. + drill + 7.;
-		return {width, width};
-	}
-	
-	virtual String ToString() {
-		return String(t_("DrillRoundless(")) + DblStr(drill) + " x " + DblStr(depth) + t_(") Radius: ") + DblStr(radius) + ", Count: " + IntStr(count);
-	}
-};
-
-class OperationMilling : public Operation {
-private:
-	double tool;
-	double depth;
-	
-	void calculateMilling() {
-	}
-public:
-	OperationMilling() {
-		OperationMilling(8, 0.1);
-	}
-	OperationMilling(Operation *operation) {
-		OperationDrill *dr = dynamic_cast<OperationDrill*>(operation);
-		if (dr) {
-			tool = dr->getDrill();
-			depth = dr->getDepth();
-		}
-	}
-	OperationMilling(double tool, double depth) {
-		this->tool = tool;
-		this->depth = depth;
-	}
-	
-	double getTool() {return tool;}
-	
-	void setTool(double diameter) {
-		tool = diameter;
-		calculateMilling();
-	}
-	
-	double getDepth() {return depth;}
-	
-	void setDepth(double d) {
-		depth = d;
-		calculateMilling();
-	}
-	Sizef getDrawSize() {
-		return {1., 1.};
-	}
-
-
-};
-
-class OperationArrayTab : public WithOperationArray<Ctrl> {
-private:
-	OperationDrillArray *operation = NULL;
-public:
-	OperationArrayTab() {
-		CtrlLayout(*this);
-		eDrill.WhenAction = [=] {
-			if (operation) {
-				operation->setDrill(eDrill);
-			}
-			Action();
-		};
-		eDepth.WhenAction = [=] {
-			if (operation) {
-				operation->setDepth(eDepth);
-			}
-			Action();
-		};
-		eCenterShiftX.WhenAction = [=] {
-			if (operation) {
-				Pointf center = operation->getCenter();
-				operation->setCenter({eCenterShiftX, center.y});
-			}
-			Action();
-		};
-		eCenterShiftY.WhenAction = [=] {
-			if (operation) {
-				Pointf center = operation->getCenter();
-				operation->setCenter({center.x, eCenterShiftY});
-			}
-			Action();
-		};
-		eWidth.WhenAction = [=] {
-			if (operation) {
-				Sizef size = operation->getSize();
-				operation->setSize({eWidth, size.cy});
-			}
-			Action();
-		};
-		eHeight.WhenAction = [=] {
-			if (operation) {
-				Sizef size = operation->getSize();
-				operation->setSize({size.cx, eHeight});
-			}
-			Action();
-		};
-		eCountX.WhenAction = [=] {
-			if (operation) {
-				Size count = operation->getCount();
-				operation->setCount({eCountX, count.cy});
-			}
-			Action();
-		};
-		eCountY.WhenAction = [=] {
-			if (operation) {
-				Size count = operation->getCount();
-				operation->setCount({count.cx, eCountY});
-			}
-			Action();
-		};
-	}
-	OperationDrillArray* setOperation(Operation *operation) {
-		if (operation == NULL) {
-			this->operation = NULL;
-			eDrill.Clear();
-			eDepth.Clear();
-			eCenterShiftX.Clear();
-			eCenterShiftY.Clear();
-			eWidth.Clear();
-			eHeight.Clear();
-			eCountX.Clear();
-			eCountY.Clear();
-			return NULL;
-		}
-		OperationDrillArray *drArray = dynamic_cast<OperationDrillArray*>(operation);
-		bool isCreateNew = (drArray == NULL);
-		if (isCreateNew) {
-			drArray = new OperationDrillArray(operation);
-		}
-		this->operation = drArray;
-		eDrill <<= drArray->getDrill();
-		eDepth <<= drArray->getDepth();
-		eCenterShiftX <<= drArray->getCenter().x;
-		eCenterShiftY <<= drArray->getCenter().y;
-		eWidth <<= drArray->getSize().cx;
-		eHeight <<= drArray->getSize().cy;
-		eCountX <<= drArray->getCount().cx;
-		eCountY <<= drArray->getCount().cy;
-		
-		return isCreateNew ? drArray : NULL;
-	}
-};
-
-class OperationRoundlessTab : public WithOperationRoudless<ParentCtrl> {
-private:
-	OperationDrillRoundless *operation = NULL;
-public:
-	OperationRoundlessTab() {
-		CtrlLayout(*this);
-		eDrill.WhenAction = [=] {
-			if (operation) {
-				operation->setDrill(eDrill);
-			}
-			Action();
-		};
-		eDepth.WhenAction = [=] {
-			if (operation) {
-				operation->setDepth(eDepth);
-			}
-			Action();
-		};
-		eCenterShiftX.WhenAction = [=] {
-			if (operation) {
-				Pointf center = operation->getCenter();
-				operation->setCenter({eCenterShiftX, center.y});
-			}
-			Action();
-		};
-		eCenterShiftY.WhenAction = [=] {
-			if (operation) {
-				Pointf center = operation->getCenter();
-				operation->setCenter({center.x, eCenterShiftY});
-			}
-			Action();
-		};
-		eRadius.WhenAction = [=] {
-			if (operation) {
-				operation->setRadius(eRadius);
-			}
-			Action();
-		};
-		eCount.WhenAction = [=] {
-			if (operation) {
-				operation->setCount(eCount);
-			}
-			Action();
-		};
-		eStartAngle.WhenAction = [=] {
-			if (operation) {
-				operation->setStartAngle(eStartAngle);
-			}
-			Action();
-		};
-	}
-	OperationDrillRoundless* setOperation(Operation *operation) {
-		if (operation == NULL) {
-			this->operation = NULL;
-			eDrill.Clear();
-			eDepth.Clear();
-			eCenterShiftX.Clear();
-			eCenterShiftY.Clear();
-			eRadius.Clear();
-			eCount.Clear();
-			eStartAngle.Clear();
-			return NULL;
-		}
-		OperationDrillRoundless *drRoundless = dynamic_cast<OperationDrillRoundless*>(operation);
-		bool isCreateNew = (drRoundless == NULL);
-		if (isCreateNew) {
-			drRoundless = new OperationDrillRoundless(operation);
-		}
-		this->operation = drRoundless;
-		eDrill <<= drRoundless->getDrill();
-		eDepth <<= drRoundless->getDepth();
-		eCenterShiftX <<= drRoundless->getCenter().x;
-		eCenterShiftY <<= drRoundless->getCenter().y;
-		eRadius <<= drRoundless->getRadius();
-		eCount <<= drRoundless->getCount();
-		eStartAngle <<= drRoundless->getStartAngle();
-		
-		return isCreateNew ? drRoundless : NULL;
-	}
-};
-
-class OperationMillingTab : public WithOperationMilling<ParentCtrl> {
-private:
-	OperationMilling *operation = NULL;
-public:
-	OperationMillingTab() {
-		CtrlLayout(*this);
-	}
-	OperationMilling* setOperation(Operation *operation) {
-		if (operation == NULL) {
-			this->operation = NULL;
-			eTool.Clear();
-			eDepth.Clear();
-			return NULL;
-		}
-		OperationMilling *milling = dynamic_cast<OperationMilling*>(operation);
-		bool isCreateNew = (milling == NULL);
-		if (isCreateNew) {
-			milling = new OperationMilling(operation);
-		}
-		this->operation = milling;
-		eTool <<= milling->getTool();
-		eDepth <<= milling->getDepth();
-		return isCreateNew ? milling : NULL;
-	}
-};
+#endif

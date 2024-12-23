@@ -1,7 +1,12 @@
 #include <Core/Core.h>
-#include "Operation.hpp"
+#include "OperationDrillArray.hpp"
+#include "OperationDrillRoundless.hpp"
+#include "OperationMilling.hpp"
 
 using namespace Upp;
+
+#define MIN_SCALE 0.2
+#define MAX_SCALE 20.0
 
 class ViewerCAM : public Ctrl {
 private:
@@ -13,16 +18,19 @@ private:
 	Vector<Operation*>* operations = NULL;
 	bool isDrawCoordinates = true;
 	bool isDrawDrillCenter = false;
+	bool isDrawMeasure = true;
 	double scale = 1.;
 	Pointf shiftDrag = {0., 0.};
 	Pointf startDrag = {0, 0};
 public:
-	void drawCoordinates(bool isDraw = true) {
+	bool GetDrawCoordinates() { return isDrawCoordinates; }
+	void SetDrawCoordinates(bool isDraw = true) {
 		isDrawCoordinates = isDraw;
 		Refresh();
 	}
 	
-	void drawDrillCenter(bool isDraw = true) {
+	bool GetDrawDrillCenter() { return isDrawDrillCenter; }
+	void SetDrawDrillCenter(bool isDraw = true) {
 		isDrawDrillCenter = isDraw;
 		if (operations != NULL) {
 			for (Operation *op : *operations) {
@@ -35,9 +43,20 @@ public:
 		Refresh();
 	}
 	
+	bool GetDrawMeasure() { return isDrawMeasure; }
+	void SetDrawMeasure(bool isDraw = true) {
+		isDrawMeasure = isDraw;
+		if (operations != NULL) {
+			for (Operation *op : *operations) {
+				if (op) op->setDrawMeasure(isDraw);
+			}
+		}
+		Refresh();
+	}
+	
 	void Paint(Draw &w) {
 		Size sz = GetSize();
-		w.DrawRect(sz, Color(240, 240, 255));
+		w.DrawRect(sz, Settings::viewerBG);
 		Pointf shift = {(double)sz.cx / 2 + shiftDrag.x, (double)sz.cy / 2 + shiftDrag.y};
 		if (operations != NULL) {
 			for (Operation* o : *operations) {
@@ -65,10 +84,10 @@ public:
 	
 	void MouseWheel(Point p, int zdelta, dword keyflags) {
 		if (zdelta > 0) {
-			if (scale > 6.) return;
+			if (scale > MAX_SCALE) return;
 			scale *= 1.2;
 		} else {
-			if (scale < 0.2) return;
+			if (scale < MIN_SCALE) return;
 			scale /= 1.2;
 		}
 		
@@ -89,13 +108,13 @@ public:
 		Image m = Ctrl::OverrideCursor(Image::SizeAll());
 	}
 	
-    virtual void MouseMove(Point p, dword keyflags) {
-        if (startDrag.x > 0) {
-	        shiftDrag.x = p.x - startDrag.x;
-	        shiftDrag.y = p.y - startDrag.y;
-	        Refresh();
-        }
+  virtual void MouseMove(Point p, dword keyflags) {
+    if (startDrag.x > 0) {
+      shiftDrag.x = p.x - startDrag.x;
+      shiftDrag.y = p.y - startDrag.y;
+      Refresh();
     }
+  }
     
 	virtual void LeftUp(Point p, dword keyflags) {
 		startDrag = {-1, -1};
@@ -110,12 +129,12 @@ public:
 		shiftDrag = {0., 0.};
 		if (operations != NULL && operations->GetCount() > 0) {
 			int cnt = operations->GetCount();
-			Operation *o = *operations[0];
+			Operation *o = (*operations)[0];
 			sz = o->getDrawSize();
 			sft = o->getDrawShift();
 			operationsRect = {sft.x, sft.y, sz.cx + sft.x, sz.cy + sft.y};
 			for (int i=1; i<cnt; ++i) {
-				o = *operations[i];
+				o = (*operations)[i];
 				if (o != NULL) {
 					sz = o->getDrawSize();
 					sft = o->getDrawShift();
@@ -128,6 +147,8 @@ public:
 			double scaleX = viewSize.cx / operationsRect.GetSize().cx;
 			double scaleY = viewSize.cy / operationsRect.GetSize().cy;
 			scale = min(scaleX, scaleY);
+			if (scale > MAX_SCALE) scale = MAX_SCALE;
+			else if (scale < MIN_SCALE) scale = MIN_SCALE;
 		} else {
 			scale = 1.;
 		}

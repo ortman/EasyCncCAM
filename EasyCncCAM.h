@@ -6,21 +6,19 @@
 using namespace Upp;
 
 #include "ViewerCAM.hpp"
-
-#define LAYOUTFILE <EasyCncCAM/EasyCncCAM.lay>
-#include <CtrlCore/lay.h>
-
-#define IMAGEFILE <EasyCncCAM/EasyCncCAM.iml>
-#include <Draw/iml_header.h>
+#include "Resource.h"
+#include "ToolEditor.hpp"
 
 class EasyCncCAM : public WithEasyCncCAMLayout<TopWindow> {
 	struct OperationListDisplay : public Display {
 		virtual void Paint(Draw& w, const Rect& r, const Value& q, Color ink, Color paper, dword style) const;
 	};
 private:
+	MenuBar menu;
+	ToolEditor toolEditor;
 	FileSel sel;
 	OperationListDisplay operationListDisplay;
-	Operation *currentOperation = new OperationDrillArray();
+	Operation *currentOperation = NULL;
 	Vector<Operation*> operations;
 	OperationArrayTab operationArrayTab;
 	OperationRoundlessTab operationRoundlessTab;
@@ -29,6 +27,7 @@ private:
 	void updateOperationTab();
 public:
 	EasyCncCAM();
+	~EasyCncCAM();
 };
 
 #endif
