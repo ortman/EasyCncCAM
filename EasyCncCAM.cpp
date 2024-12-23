@@ -32,10 +32,10 @@ EasyCncCAM::EasyCncCAM() {
 			bar.Add(t_("Generate CAM"), [=] {
 			});
 			bar.Add(t_("Tool editor"), [=] {
-				if (toolEditor.IsOpen()) {
-					toolEditor.SetFocus();
+				if (settingsWindow.toolEditor.IsOpen()) {
+					settingsWindow.toolEditor.SetFocus();
 				} else {
-					toolEditor.Open();
+					settingsWindow.toolEditor.Open();
 				}
 			});
 		});
@@ -57,6 +57,11 @@ EasyCncCAM::EasyCncCAM() {
 			});
 		});
 		bar.Add(t_("Settings"), [=] {
+			if (settingsWindow.IsOpen()) {
+				settingsWindow.SetFocus();
+			} else {
+				settingsWindow.Open();
+			}
 		});
 	});
 	
@@ -127,17 +132,17 @@ EasyCncCAM::EasyCncCAM() {
 	operationArrayTab.WhenPushToolEditor =
 	operationRoundlessTab.WhenPushToolEditor =
 	operationMillingTab.WhenPushToolEditor  = [=] {
-		if (toolEditor.IsOpen()) {
-			toolEditor.SetFocus();
+		if (settingsWindow.toolEditor.IsOpen()) {
+			settingsWindow.toolEditor.SetFocus();
 		} else {
-			toolEditor.Open();
+			settingsWindow.toolEditor.Open();
 		}
 	};
-	toolEditor.WhenClose = [=] {
+	settingsWindow.toolEditor.WhenClose = [=] {
 		operationArrayTab.updateToolList();
 		operationRoundlessTab.updateToolList();
 		operationMillingTab.updateToolList();
-		toolEditor.Close();
+		settingsWindow.toolEditor.Close();
 	};
 	
 	if (Settings::tools.GetCount() > 0) {

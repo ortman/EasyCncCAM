@@ -32,3 +32,9 @@ LAYOUT(ToolEditorLayout, 564, 368)
 	ITEM(Upp::EditDoubleSpin, eSpeed, LeftPosZ(240, 72).BottomPosZ(32, 24))
 END_LAYOUT
 
+LAYOUT(SettingsLayout, 480, 368)
+	ITEM(Upp::Button, bToolEditor, SetLabel(t_("Tool editor")).LeftPosZ(4, 148).TopPosZ(4, 28))
+	ITEM(Upp::Button, bSave, SetLabel(t_("Save")).RightPosZ(92, 84).BottomPosZ(4, 28))
+	ITEM(Upp::Button, bCancel, SetLabel(t_("Cancel")).RightPosZ(4, 84).BottomPosZ(4, 28))
+END_LAYOUT
+
