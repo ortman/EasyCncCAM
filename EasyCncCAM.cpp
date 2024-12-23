@@ -32,7 +32,11 @@ EasyCncCAM::EasyCncCAM() {
 			bar.Add(t_("Generate CAM"), [=] {
 			});
 			bar.Add(t_("Tool editor"), [=] {
-				toolEditor.Run();
+				if (toolEditor.IsOpen()) {
+					toolEditor.SetFocus();
+				} else {
+					toolEditor.Open();
+				}
 			});
 		});
 		bar.Sub(t_("View"), [=](Bar &bar) {
@@ -123,14 +127,19 @@ EasyCncCAM::EasyCncCAM() {
 	operationArrayTab.WhenPushToolEditor =
 	operationRoundlessTab.WhenPushToolEditor =
 	operationMillingTab.WhenPushToolEditor  = [=] {
-		toolEditor.Run();
+		if (toolEditor.IsOpen()) {
+			toolEditor.SetFocus();
+		} else {
+			toolEditor.Open();
+		}
 	};
 	toolEditor.WhenClose = [=] {
 		operationArrayTab.updateToolList();
 		operationRoundlessTab.updateToolList();
 		operationMillingTab.updateToolList();
+		toolEditor.Close();
 	};
-
+	
 	if (Settings::tools.GetCount() > 0) {
 		OperationDrillArray *op = new OperationDrillArray();
 		op->setTool(Settings::tools[0]);
