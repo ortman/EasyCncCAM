@@ -9,14 +9,28 @@ class Settings {
 private:
 	static Settings settings;
 public:
-	void Jsonize(JsonIO& json) {
-		if (json.IsStoring()) {
-			json
-				("tools", tools)
-				//("viewer", JsonIO("1","2"))
-				;
+	void Jsonize(JsonIO& jio) {
+		if (jio.IsStoring()) {
+			JsonIO viewer;
+			double arrowAngleGrad = measurersArrowAngle * 180. / M_PI;
+			String colorBG = ColorToHtml(viewerBG);
+			String colorC = ColorToHtml(drillColor);
+			String colorDC = ColorToHtml(drillCenterColor);
+			String colorM = ColorToHtml(measurersColor);
+			viewer
+				("background", colorBG)
+				("drillColor", colorC)
+				("drillLineWidth", drillLineWidth)
+				("drillCenterColor", colorDC)
+				("measurersColor", colorM)
+				("measurersFont", measurersFont)
+				("measurersLineWidth", measurersLineWidth)
+				("measurersArrowSize", measurersArrowSize)
+				("measurersArrowAngle", arrowAngleGrad);
+			jio("tools", tools);
+			jio.Set("viewer", viewer.GetResult());
 		} else {
-			Value v, j = json.Get();
+			Value v, j = jio.Get();
 			if (!j.IsNull()) {
 				tools.Clear();
 				ValueArray valueTools = j["tools"];
@@ -26,22 +40,26 @@ public:
 				Value viewer = j["viewer"];
 				if (!viewer.IsNull()) {
 					if (!(v = viewer["background"]).IsNull()) {
-						viewerBG = v;
+						viewerBG = ColorFromText((String)v);
 					}
 					if (!(v = viewer["drillColor"]).IsNull()) {
-						drillColor = v;
+						drillColor = ColorFromText((String)v);
 					}
 					if (!(v = viewer["drillLineWidth"]).IsNull()) {
 						drillLineWidth = v;
 					}
 					if (!(v = viewer["drillCenterColor"]).IsNull()) {
-						drillCenterColor = v;
+						drillCenterColor = ColorFromText((String)v);
 					}
 					if (!(v = viewer["measurersColor"]).IsNull()) {
-						measurersColor = v;
+						measurersColor = ColorFromText((String)v);
 					}
 					if (!(v = viewer["measurersFont"]).IsNull()) {
-						measurersFont = v;
+						JsonIO jioF(v);
+						measurersFont.Jsonize(jioF);
+						if (measurersFont == Null) {
+							measurersFont = StdFont(20);
+						}
 					}
 					if (!(v = viewer["measurersLineWidth"]).IsNull()) {
 						measurersLineWidth = v;
@@ -50,7 +68,7 @@ public:
 						measurersArrowSize = v;
 					}
 					if (!(v = viewer["measurersArrowAngle"]).IsNull()) {
-						measurersArrowAngle = v;
+						measurersArrowAngle = (double)v * M_PI / 180.;
 					}
 				}
 			}
