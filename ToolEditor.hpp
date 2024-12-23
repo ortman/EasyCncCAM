@@ -97,8 +97,7 @@ public:
 				Settings::tools.Add(clTools.GetValue(i));
 			}
 			Settings::Save();
-			Close();
-			WhenClose(); // TODO:: Why?
+			WhenClose();
 		};
 		
 		bCancel.WhenPush = [=] {
@@ -106,16 +105,13 @@ public:
 		};
 	}
 
-	~ToolEditor() {
-		//Tool::tools.clear();
-	}
-	
-	int Run(bool appmodal = false) {
+	void Open() {
 		clTools.Clear();
 		for (Tool t : Settings::tools) {
 			clTools.Add(t);
 		}
 		if (clTools.GetCount() > 0) clTools.SetCursor(0);
-		return TopWindow::Run(appmodal);
+		return TopWindow::Open();
 	}
+
 };
