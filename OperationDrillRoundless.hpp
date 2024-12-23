@@ -5,10 +5,10 @@
 
 class OperationDrillRoundless : public OperationDrill {
 private:
-	double radius;
-	int count;
-	double startAngle;
-	double sector;
+	double radius = 15.;
+	int count = 6;
+	double startAngle = 0.;
+	double sector = 360.;
 	
 	void calculate() {
 		drills.clear();
@@ -29,18 +29,10 @@ private:
 	
 public:
 	OperationDrillRoundless() {
-		radius = 30.;
-		count = 6;
-		startAngle = 0.;
-		sector = 360.;
 		calculate();
 	}
 	
 	OperationDrillRoundless(Operation *operation) : OperationDrill(operation) {
-		radius = 30.;
-		count = 6;
-		startAngle = 0.;
-		sector = 360.;
 		calculate();
 	}
 	
@@ -160,7 +152,7 @@ public:
 					(int)(delta * scale), (int)(delta * scale),
 					(int)((radius*2.) * scale), (int)((radius*2.) * scale),
 					Null, Settings::measurersLineWidth, Settings::measurersColor);
-				DrawMeasureRadius(center.x, center.y, radius, 45);
+				DrawMeasureRadius(center.x, center.y, radius);
 			}
 		}
 	}

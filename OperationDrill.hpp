@@ -46,7 +46,7 @@ protected:
 		if (isDrawMeasure) {
 			if (drills.GetCount() > 0) {
 				Pointf &d = drills[0];
-				DrawMeasureDiameter(d.x, d.y, tool.diameter, 45.);
+				DrawMeasureDiameter(d.x, d.y, tool.diameter);
 			}
 		}
 	}
