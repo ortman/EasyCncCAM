@@ -99,11 +99,12 @@ public:
 	virtual const String gcode(GCode *g) {
 		String s;
 		calculate();
-		s << g->Comment("OperationDrill");
+		s << g->RunSpindele(tool.speed);
+		s	<< g->CoolantOn();
 		for (Pointf p : drills) {
-			s << g->Comment("Point " + DblStr(p.x) + ", " + DblStr(p.y));
-			s << g->G0(p.x, p.y);
+			s << g->Move0(p.x, p.y);
 		}
+		s	<< g->CoolantOff();
 		return s;
 	}
 };

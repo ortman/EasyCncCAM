@@ -182,6 +182,7 @@ EasyCncCAM::EasyCncCAM() {
 			GCode* g = new GCodeMach3();
 			String out = GCodeGenerator::Generate(operations, g);
 			LOG(out);
+			delete g;
 			//ErrorOK("Oops(. This functionality is not exist!");
 		//}
 	};
