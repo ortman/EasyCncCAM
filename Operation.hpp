@@ -67,8 +67,8 @@ protected:
 			}
 		}, Settings::measurersColor);
 	}
-	void DrawMeasureDiameter(double x, double y, double diameter, double angle, const String& text = "") {
-		String str = text.IsEmpty() ? DblStr(diameter) : text;
+	void DrawMeasureDiameter(double x, double y, double diameter, double angle = 45., const String& text = "") {
+		String str = text.IsEmpty() ? ("Ø" + DblStr(diameter)) : text;
 		Size textSize = GetTextSize(str, Settings::measurersFont);
 		double radius = diameter / 2.;
 		double anglePI = angle * M_PI/180.;
@@ -95,8 +95,8 @@ protected:
 		DrawMeasureArrow((int)((x + radius * cos(anglePI) - shiftDraw.x) * scale), (int)((y - radius * sin(anglePI) - shiftDraw.y) * scale), -anglePI);
 		DrawMeasureArrow((int)((x - radius * cos(anglePI) - shiftDraw.x) * scale), (int)((y + radius * sin(anglePI) - shiftDraw.y) * scale), -anglePI + M_PI);
 	}
-	void DrawMeasureRadius(double x, double y, double radius, double angle, const String& text = "") {
-		String str = text.IsEmpty() ? DblStr(radius) : text;
+	void DrawMeasureRadius(double x, double y, double radius, double angle = 45., const String& text = "") {
+		String str = text.IsEmpty() ? ("R" + DblStr(radius)) : text;
 		Size textSize = GetTextSize(str, Settings::measurersFont);
 		double anglePI = angle * M_PI/180.;
 		double xD = (radius + 30. / scale) * cos(anglePI);
