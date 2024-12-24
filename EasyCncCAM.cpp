@@ -144,6 +144,20 @@ EasyCncCAM::EasyCncCAM() {
 		operationMillingTab.updateToolList();
 		settingsWindow.toolEditor.Close();
 	};
+	settingsWindow.WhenClose = [=] {
+		settingsWindow.Close();
+		for (Operation* op : operations) {
+			op->calculateDraw();
+		}
+		viewer.Refresh();
+	};
+	settingsWindow.WhenAction = [=] {
+		for (Operation* op : operations) {
+			op->calculateDraw();
+		}
+		viewer.Refresh();
+	};
+
 	
 	if (Settings::tools.GetCount() > 0) {
 		OperationDrillArray *op = new OperationDrillArray();
@@ -184,7 +198,6 @@ EasyCncCAM::~EasyCncCAM() {
 	int cnt = operations.GetCount();
 	for (int i=cnt-1; i>=0; --i) {
 		if (operations[i] != NULL) delete operations[i];
-		//operations.Remove(i);
 	}
 }
 
@@ -209,8 +222,6 @@ void EasyCncCAM::updateOperationTab() {
 					clOperations.Set(idx, (int64)op);
 					delete currentOperation;
 					currentOperation = op;
-				//} else {
-				//	operations.Add(op);
 				}
 			}
 			break;
@@ -226,8 +237,6 @@ void EasyCncCAM::updateOperationTab() {
 					clOperations.Set(idx, (int64)op);
 					delete currentOperation;
 					currentOperation = op;
-				//} else {
-				//	operations.Add(op);
 				}
 			}
 			break;
@@ -242,8 +251,6 @@ void EasyCncCAM::updateOperationTab() {
 					clOperations.Set(idx, (int64)op);
 					delete currentOperation;
 					currentOperation = op;
-				//} else {
-				//	operations.Add(op);
 				}
 			}
 			break;
