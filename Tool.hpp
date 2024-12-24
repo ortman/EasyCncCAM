@@ -1,5 +1,5 @@
-#ifndef _EasyCncCAM_Tool_hpp_
-#define _EasyCncCAM_Tool_hpp_
+#ifndef _TOOL_H_
+#define _TOOL_H_
 
 #include <CtrlLib/CtrlLib.h>
 

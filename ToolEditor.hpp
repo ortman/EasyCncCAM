@@ -1,3 +1,6 @@
+#ifndef _TOOL_EDITOR_H_
+#define _TOOL_EDITOR_H_
+
 #include "Resource.h"
 #include "Tool.hpp"
 #include "Settings.hpp"
@@ -113,5 +116,6 @@ public:
 		if (clTools.GetCount() > 0) clTools.SetCursor(0);
 		return TopWindow::Open();
 	}
-
 };
+
+#endif

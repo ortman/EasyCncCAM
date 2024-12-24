@@ -152,7 +152,7 @@ public:
 					(int)(delta * scale), (int)(delta * scale),
 					(int)((radius*2.) * scale), (int)((radius*2.) * scale),
 					Null, Settings::measurersLineWidth, Settings::measurersColor);
-				DrawMeasureRadius(center.x, center.y, radius);
+					DrawMeasureRadius(center.x, center.y, radius);
 			}
 		}
 	}

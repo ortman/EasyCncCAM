@@ -1,5 +1,5 @@
-#ifndef _EasyCncCAM_EasyCncCAM_h
-#define _EasyCncCAM_EasyCncCAM_h
+#ifndef _EASY_CNC_CAM_H_
+#define _EASY_CNC_CAM_H_
 
 #include <CtrlLib/CtrlLib.h>
 
@@ -7,6 +7,7 @@ using namespace Upp;
 
 #include "ViewerCAM.hpp"
 #include "Resource.h"
+#include "SettingsWindow.hpp"
 #include "ToolEditor.hpp"
 
 class EasyCncCAM : public WithEasyCncCAMLayout<TopWindow> {
@@ -15,7 +16,7 @@ class EasyCncCAM : public WithEasyCncCAMLayout<TopWindow> {
 	};
 private:
 	MenuBar menu;
-	ToolEditor toolEditor;
+	SettingsWindow settingsWindow;
 	FileSel sel;
 	OperationListDisplay operationListDisplay;
 	Operation *currentOperation = NULL;

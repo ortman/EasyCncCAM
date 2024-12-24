@@ -1,3 +1,6 @@
+#ifndef _VIEWER_CAM_H_
+#define _VIEWER_CAM_H_
+
 #include <Core/Core.h>
 #include "OperationDrillArray.hpp"
 #include "OperationDrillRoundless.hpp"
@@ -12,8 +15,8 @@ class ViewerCAM : public Ctrl {
 private:
 	Size coordSize = {100, 100};
 	void drawCoordinates(Draw &w, Point p) {
-		w.DrawLine(p.x, p.y, p.x + coordSize.cx, p.y, 1, Red());
-		w.DrawLine(p.x, p.y - coordSize.cy, p.x, p.y, 1, Green());
+		w.DrawLine(p.x, p.y, p.x + coordSize.cx, p.y, Settings::measurersLineWidth, Red);
+		w.DrawLine(p.x, p.y - coordSize.cy, p.x, p.y, Settings::measurersLineWidth, Green);
 	}
 	Vector<Operation*>* operations = NULL;
 	bool isDrawCoordinates = true;
@@ -21,7 +24,7 @@ private:
 	bool isDrawMeasure = true;
 	double scale = 1.;
 	Pointf shiftDrag = {0., 0.};
-	Pointf startDrag = {0, 0};
+	Pointf startDrag = {0., 0.};
 public:
 	bool GetDrawCoordinates() { return isDrawCoordinates; }
 	void SetDrawCoordinates(bool isDraw = true) {
@@ -57,7 +60,7 @@ public:
 	void Paint(Draw &w) {
 		Size sz = GetSize();
 		w.DrawRect(sz, Settings::viewerBG);
-		Pointf shift = {(double)sz.cx / 2 + shiftDrag.x, (double)sz.cy / 2 + shiftDrag.y};
+		Pointf shift = {(double)sz.cx / 2. + shiftDrag.x, (double)sz.cy / 2. + shiftDrag.y};
 		if (operations != NULL) {
 			for (Operation* o : *operations) {
 				if (o != NULL) {
@@ -109,7 +112,7 @@ public:
 	}
 	
   virtual void MouseMove(Point p, dword keyflags) {
-    if (startDrag.x > 0) {
+    if (startDrag.x > 0.) {
       shiftDrag.x = p.x - startDrag.x;
       shiftDrag.y = p.y - startDrag.y;
       Refresh();
@@ -117,7 +120,7 @@ public:
   }
     
 	virtual void LeftUp(Point p, dword keyflags) {
-		startDrag = {-1, -1};
+		startDrag = {-1.,  -1.};
 		Ctrl::OverrideCursor(Image::Arrow());
 	}
 	
@@ -125,7 +128,7 @@ public:
 		Size sz, viewSize = GetSize();
 		Rectf operationsRect;
 		Pointf sft;
-		startDrag.x = -1;
+		startDrag.x = -1.;
 		shiftDrag = {0., 0.};
 		if (operations != NULL && operations->GetCount() > 0) {
 			int cnt = operations->GetCount();
@@ -165,3 +168,5 @@ public:
 	}
 
 };
+
+#endif

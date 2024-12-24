@@ -12,11 +12,12 @@ file
 	OperationMilling.hpp,
 	OperationDrillArray.hpp,
 	OperationDrill.hpp,
-	Operation.hpp,
 	Translation.t,
 	EasyCncCAM.cpp,
+	SettingsWindow.hpp,
 	ViewerCAM.hpp,
 	Settings.hpp,
+	Operation.hpp,
 	ToolEditor.hpp,
 	EasyCncCAM.lay,
 	EasyCncCAM.iml;

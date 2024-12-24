@@ -32,10 +32,10 @@ EasyCncCAM::EasyCncCAM() {
 			bar.Add(t_("Generate CAM"), [=] {
 			});
 			bar.Add(t_("Tool editor"), [=] {
-				if (toolEditor.IsOpen()) {
-					toolEditor.SetFocus();
+				if (settingsWindow.toolEditor.IsOpen()) {
+					settingsWindow.toolEditor.SetFocus();
 				} else {
-					toolEditor.Open();
+					settingsWindow.toolEditor.Open();
 				}
 			});
 		});
@@ -56,7 +56,12 @@ EasyCncCAM::EasyCncCAM() {
 				bShowMeasure.SetStyle(enabled ? Button::StyleOk() : Button::StyleNormal());
 			}).Check(viewer.GetDrawMeasure());
 		});
-		bar.Add(false, t_("Settings"), [=] {
+		bar.Add(t_("Settings"), [=] {
+			if (settingsWindow.IsOpen()) {
+				settingsWindow.SetFocus();
+			} else {
+				settingsWindow.Open();
+			}
 		});
 	});
 	
@@ -127,17 +132,30 @@ EasyCncCAM::EasyCncCAM() {
 	operationArrayTab.WhenPushToolEditor =
 	operationRoundlessTab.WhenPushToolEditor =
 	operationMillingTab.WhenPushToolEditor  = [=] {
-		if (toolEditor.IsOpen()) {
-			toolEditor.SetFocus();
+		if (settingsWindow.toolEditor.IsOpen()) {
+			settingsWindow.toolEditor.SetFocus();
 		} else {
-			toolEditor.Open();
+			settingsWindow.toolEditor.Open();
 		}
 	};
-	toolEditor.WhenClose = [=] {
+	settingsWindow.toolEditor.WhenClose = [=] {
 		operationArrayTab.updateToolList();
 		operationRoundlessTab.updateToolList();
 		operationMillingTab.updateToolList();
-		toolEditor.Close();
+		settingsWindow.toolEditor.Close();
+	};
+	settingsWindow.WhenClose = [=] {
+		settingsWindow.Close();
+		for (Operation* op : operations) {
+			op->calculateDraw();
+		}
+		viewer.Refresh();
+	};
+	settingsWindow.WhenAction = [=] {
+		for (Operation* op : operations) {
+			op->calculateDraw();
+		}
+		viewer.Refresh();
 	};
 	
 	if (Settings::tools.GetCount() > 0) {
@@ -179,7 +197,6 @@ EasyCncCAM::~EasyCncCAM() {
 	int cnt = operations.GetCount();
 	for (int i=cnt-1; i>=0; --i) {
 		if (operations[i] != NULL) delete operations[i];
-		//operations.Remove(i);
 	}
 }
 
@@ -204,8 +221,6 @@ void EasyCncCAM::updateOperationTab() {
 					clOperations.Set(idx, (int64)op);
 					delete currentOperation;
 					currentOperation = op;
-				//} else {
-				//	operations.Add(op);
 				}
 			}
 			break;
@@ -221,8 +236,6 @@ void EasyCncCAM::updateOperationTab() {
 					clOperations.Set(idx, (int64)op);
 					delete currentOperation;
 					currentOperation = op;
-				//} else {
-				//	operations.Add(op);
 				}
 			}
 			break;
@@ -237,8 +250,6 @@ void EasyCncCAM::updateOperationTab() {
 					clOperations.Set(idx, (int64)op);
 					delete currentOperation;
 					currentOperation = op;
-				//} else {
-				//	operations.Add(op);
 				}
 			}
 			break;

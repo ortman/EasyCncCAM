@@ -84,6 +84,18 @@ public:
 		out.Close();
 	}
 	
+	static void RestoreDefault() {
+		Settings::viewerBG = Color(240, 240, 255);
+		Settings::drillColor = Blue;
+		Settings::drillLineWidth = 2;
+		Settings::drillCenterColor = LtRed;
+		Settings::measurersColor = Black;
+		Settings::measurersFont = StdFont(20);
+		Settings::measurersLineWidth = 1;
+		Settings::measurersArrowSize = 20.;
+		Settings::measurersArrowAngle = M_PI / 10.;
+	}
+	
 	static Vector<Tool> tools;
 	static Color viewerBG;
 	static Color drillColor;
@@ -107,6 +119,7 @@ Color Settings::measurersColor = Black;
 Font Settings::measurersFont = StdFont(20);
 int Settings::measurersLineWidth = 1;
 double Settings::measurersArrowSize = 20.;
-double Settings::measurersArrowAngle = M_PI/10.;
+double Settings::measurersArrowAngle = M_PI / 10.;
+
 
 #endif
