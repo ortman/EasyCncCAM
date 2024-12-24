@@ -1,5 +1,5 @@
-#ifndef _EasyCncCAM_Resource_h_
-#define _EasyCncCAM_Resource_h_
+#ifndef _RESOURCE_H_
+#define _RESOURCE_H_
 
 #define LAYOUTFILE <EasyCncCAM/EasyCncCAM.lay>
 #include <CtrlCore/lay.h>
