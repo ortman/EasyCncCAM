@@ -29,10 +29,18 @@ public:
 		M30
 	};
 	
+	virtual inline const String Start() { return ""; }
+	virtual inline const String End() { return ""; }
 	virtual inline const String Comment(const String& c) { return ""; }
 	
 	virtual inline const String Move0(double x = NAN, double y = NAN, double z = NAN, double f = NAN) { return ""; }
+	virtual inline const String MoveZ0(double z = NAN, double f = NAN) {
+		return Move0(NAN, NAN, z, f);
+	}
 	virtual inline const String Move1(double x = NAN, double y = NAN, double z = NAN, double f = NAN) { return ""; }
+	virtual inline const String MoveZ1(double z = NAN, double f = NAN) {
+		return Move1(NAN, NAN, z, f);
+	}
 	
 	virtual inline const String RunSpindele(int speed, bool clockwise = true) { return ""; }
 	virtual inline const String SetFlat(GCode::Flat f) { return ""; }
@@ -41,7 +49,6 @@ public:
 	virtual inline const String SpindeleOff() { return ""; }
 	virtual inline const String CoolantOn() { return ""; }
 	virtual inline const String CoolantOff() { return ""; }
-	virtual inline const String End() { return ""; }
 
 };
 

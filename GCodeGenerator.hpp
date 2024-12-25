@@ -11,17 +11,18 @@ public:
 	static String Generate(const Vector<Operation*> &operations, GCode* g) {
 		String s;
 		if (g == NULL) return s;
-		s << g->SetFlat(GCode::XY)
-			<< g->Metric();
+		s << g->Start();
+		s << g->SetFlat(GCode::XY);
+		s << g->Metric();
 			
 		for (Operation *op : operations) {
 			s << g->Comment(op->ToString());
 			s << op->gcode(g);
 		}
 
-		s << g->CoolantOff()
-			<< g->SpindeleOff()
-			<< g->End();
+		s << g->CoolantOff();
+		s << g->SpindeleOff();
+		s << g->End();
 
 		return s;
 	}

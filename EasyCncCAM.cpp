@@ -3,7 +3,11 @@
 
 EasyCncCAM::EasyCncCAM() {
 	CtrlLayout(*this, "Easy CNC CAM");
+	Icon(ResourceImage::Mill2());
+	LargeIcon(ResourceImage::Mill2());
 	Sizeable().Zoomable();
+	sel.Type("GCode (*." + Settings::fileExt + ")", "*." + Settings::fileExt);
+	sel.Type("All files (*.*)", "*.*");
 	
 	bShowCoordinates.SetImage(ResourceImage::Coordinates());
 	bShowDrillCenters.SetImage(ResourceImage::DrillCenters());
@@ -178,13 +182,19 @@ EasyCncCAM::EasyCncCAM() {
 	clOperations.SetCursor(clOperations.GetCount()-1);
 	
 	bGenerate.WhenPush = [=] {
-		//if (sel.ExecuteSaveAs()) {
-			GCode* g = new GCodeMach3();
-			String out = GCodeGenerator::Generate(operations, g);
-			LOG(out);
-			delete g;
-			//ErrorOK("Oops(. This functionality is not exist!");
-		//}
+		if (sel.ExecuteSaveAs() && !sel.Get().IsEmpty()) {
+			FileOut f;
+			if (f.Open(~sel)) {
+				GCode* g = new GCodeMach3();
+				String out = GCodeGenerator::Generate(operations, g);
+				//LOG(out);
+				delete g;
+				f.Put(out);
+				f.Close();
+			} else {
+				ErrorOK("Can not save file!");
+			}
+		}
 	};
 	bShowCoordinates.SetStyle(viewer.GetDrawCoordinates() ? Button::StyleOk() : Button::StyleNormal());
 	bShowDrillCenters.SetStyle(viewer.GetDrawDrillCenter() ? Button::StyleOk() : Button::StyleNormal());

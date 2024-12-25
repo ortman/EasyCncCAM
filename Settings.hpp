@@ -27,7 +27,7 @@ public:
 				("measurersLineWidth", measurersLineWidth)
 				("measurersArrowSize", measurersArrowSize)
 				("measurersArrowAngle", arrowAngleGrad);
-			jio("tools", tools);
+			jio("tools", tools)("fileExt", fileExt);
 			jio.Set("viewer", viewer.GetResult());
 		} else {
 			Value v, j = jio.Get();
@@ -71,11 +71,16 @@ public:
 						measurersArrowAngle = (double)v * M_PI / 180.;
 					}
 				}
+				if (!(v = j["fileExt"]).IsNull()) {
+					fileExt = (String)v;
+					//TODO: check string
+				}
 			}
 		}
 	}
 
 	static void Load() {
+		RestoreDefault();
 		LoadFromJsonFile(Settings::settings, GetExeDirFile(SETTINGS_FILENAME));
 	}
 	static void Save() {
@@ -85,15 +90,16 @@ public:
 	}
 	
 	static void RestoreDefault() {
-		Settings::viewerBG = Color(240, 240, 255);
-		Settings::drillColor = Blue;
-		Settings::drillLineWidth = 2;
-		Settings::drillCenterColor = LtRed;
-		Settings::measurersColor = Black;
-		Settings::measurersFont = StdFont(20);
-		Settings::measurersLineWidth = 1;
-		Settings::measurersArrowSize = 20.;
-		Settings::measurersArrowAngle = M_PI / 10.;
+		viewerBG = Color(240, 240, 255);
+		drillColor = Blue;
+		drillLineWidth = 2;
+		drillCenterColor = LtRed;
+		measurersColor = Black;
+		measurersFont = StdFont(20);
+		measurersLineWidth = 1;
+		measurersArrowSize = 20.;
+		measurersArrowAngle = M_PI / 10.;
+		fileExt = "TAP";
 	}
 	
 	static Vector<Tool> tools;
@@ -106,6 +112,7 @@ public:
 	static int measurersLineWidth;
 	static double measurersArrowSize;
 	static double measurersArrowAngle;
+	static String fileExt;
 };
 
 Settings Settings::settings;
@@ -120,6 +127,7 @@ Font Settings::measurersFont = StdFont(20);
 int Settings::measurersLineWidth = 1;
 double Settings::measurersArrowSize = 20.;
 double Settings::measurersArrowAngle = M_PI / 10.;
+String Settings::fileExt = "TAP";
 
 
 #endif

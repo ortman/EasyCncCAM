@@ -6,7 +6,6 @@
 using namespace Upp;
 
 struct Tool : ValueType<Tool, 10013, Comparable<Tool, Moveable<Tool>>> {
-//public:
 	enum Type {
 		Other = 0,
 		Drill = 1,
@@ -15,15 +14,21 @@ struct Tool : ValueType<Tool, 10013, Comparable<Tool, Moveable<Tool>>> {
 	Tool::Type type;
 	double diameter;
 	double length;
-	double speed;
-//public:
-	Tool() {}
-	Tool(Tool::Type t, double d, double l, double s) : type(t), diameter(d), length(l), speed(s) {}
+	int speed;
+	int feedRateXY;
+	int feedRateZ;
+
+	Tool() : Tool(Drill, 0., 10., 6000, 0, 0) {}
+	Tool(Tool::Type t, double d, double l, int s, int fXY, int fZ) :
+			type(t), diameter(d), length(l), speed(s), feedRateXY(fXY), feedRateZ(fZ) {}
 	Tool(const Value& v) {
 		type = typeFromString(v["type"]);
 		diameter = v["diameter"];
 		length = v["length"];
 		speed = v["speed"];
+		feedRateXY =  v["feedrateXY"];
+		if (type == Drill) feedRateXY = 0;
+		feedRateZ = v["feedrateZ"];
 	}
 
 	operator Value() const {
@@ -33,18 +38,20 @@ struct Tool : ValueType<Tool, 10013, Comparable<Tool, Moveable<Tool>>> {
 		v("diameter") = diameter;
 		v("length") = length;
 		v("speed") = speed;
+		v("feedrateXY") = feedRateXY;
+		v("feedrateZ") = feedRateZ;
 		return v;
 	}
 	int Compare(const Tool& o) const { return CombineCompare((int)type, (int)o.type)(diameter, o.diameter)(length, o.length)(speed, o.speed); }
 	void Serialize(Stream& s) {
 		//String t = typeToString(type);
 		int t = type;
-		s % t % diameter % length % speed;
+		s % t % diameter % length % speed % feedRateXY % feedRateZ;
 	}
 	String ToString() const {
 		return typeToString(type, true) + " " + DblStr(diameter) + "x" + DblStr(length);
 	}
-	hash_t GetHashValue() const { return CombineHash((int)(type), diameter, length, speed); }
+	hash_t GetHashValue() const { return CombineHash((int)(type), diameter, length, speed) << feedRateXY << feedRateZ; }
 	bool IsNullInstance() const { return IsNull(diameter); }
 	
 	static String typeToString(Type type, bool localize = false) {
@@ -75,6 +82,8 @@ struct Tool : ValueType<Tool, 10013, Comparable<Tool, Moveable<Tool>>> {
 				("diameter", diameter)
 				("length", length)
 				("speed", speed)
+				("feedrateXY", feedRateXY)
+				("feedrateZ", feedRateZ)
 			;
 		} else {
 			Value v = json.Get();
@@ -83,6 +92,8 @@ struct Tool : ValueType<Tool, 10013, Comparable<Tool, Moveable<Tool>>> {
 				diameter = v["diameter"];
 				length = v["length"];
 				speed = v["speed"];
+				feedRateXY = v["feedrateXY"];
+				feedRateZ = v["feedrateZ"];
 			}
 		}
 	}
@@ -93,6 +104,8 @@ struct Tool : ValueType<Tool, 10013, Comparable<Tool, Moveable<Tool>>> {
 			diameter = t.diameter;
 			length = t.length;
 			speed = t.speed;
+			feedRateXY = t.feedRateXY;
+			feedRateZ = t.feedRateZ;
 		}
 		return *this;
 	}

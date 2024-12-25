@@ -24,7 +24,7 @@ public:
 		CtrlLayout(*this, t_("Tool editor"));
 		Sizeable().Zoomable();
 		bAdd.WhenPush = [=] {
-			Tool t(Tool::Drill, 0, 0, 0);
+			Tool t;
 			clTools.Add(t);
 			clTools.SetCursor(clTools.GetCount()-1);
 		};
@@ -52,11 +52,16 @@ public:
 				eDiameter <<= selectedTool.diameter;
 				eLength <<= selectedTool.length;
 				eSpeed <<= selectedTool.speed;
+				eFeedRateXY <<= selectedTool.feedRateXY;
+				eFeedRateXY.Enable(dlType != Tool::Drill);
+				eFeedRateZ <<= selectedTool.feedRateZ;
 			} else {
 				dlType = -1;
 				eDiameter.Clear();
 				eLength.Clear();
 				eSpeed.Clear();
+				eFeedRateXY.Clear();
+				eFeedRateZ.Clear();
 			}
 		};
 		dlType.WhenAction = [=] {
@@ -88,6 +93,22 @@ public:
 			int i = clTools.GetCursor();
 			if (i >= 0) {
 				selectedTool.speed = eSpeed;
+				clTools.Set(i , selectedTool);
+				clTools.Refresh();
+			}
+		};
+		eFeedRateXY.WhenAction = [=] {
+			int i = clTools.GetCursor();
+			if (i >= 0) {
+				selectedTool.feedRateXY = eFeedRateXY;
+				clTools.Set(i , selectedTool);
+				clTools.Refresh();
+			}
+		};
+		eFeedRateZ.WhenAction = [=] {
+			int i = clTools.GetCursor();
+			if (i >= 0) {
+				selectedTool.feedRateZ = eFeedRateZ;
 				clTools.Set(i , selectedTool);
 				clTools.Refresh();
 			}

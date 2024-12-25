@@ -21,6 +21,7 @@ protected:
 	Pointf shiftDraw = {0., 0.};
 	Tool tool;
 	bool isDrawMeasure = false;
+	double safeToolH = -5.;
 		
 	void DrawAlphaLine(int x1, int y1, int x2, int y2, int width, Color color, int alpha = 255) {
 			draw->DrawLine(x1, y1, x2, y2, width, color);

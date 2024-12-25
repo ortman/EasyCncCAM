@@ -16,7 +16,17 @@ private:
 	CMD lastCooland = NONE;
 
 public:
-	virtual inline const String Comment(const String& c) {
+	inline const String Start() {
+		lastCMD = NONE;
+		return "%\n";
+	}
+	
+	inline const String End() {
+		lastCMD = NONE;
+		return "M30\n%\n";
+	}
+	
+	inline const String Comment(const String& c) {
 		String s = c;
 		s.Replace("(", "");
 		s.Replace(")", "");
@@ -43,8 +53,8 @@ public:
 			sb << " F" << DblStrMach3(f);
 			lastF = f;
 		}
-		lastCMD = G00;
 		if (sb.GetLength() == 0) return "";
+		lastCMD = G00;
 		return sb.Mid(1) << "\n";
 	}
 	
@@ -67,8 +77,8 @@ public:
 			sb << " F" << DblStrMach3(f);
 			lastF = f;
 		}
-		lastCMD = G01;
 		if (sb.GetLength() == 0) return "";
+		lastCMD = G01;
 		return sb.Mid(1) << "\n";
 	}
 	
@@ -119,11 +129,6 @@ public:
 		if (lastCooland == M9) return "";
 		lastCooland = lastCMD = M9;
 		return "M9\n";
-	}
-	
-	inline const String End() {
-		lastCMD = M30;
-		return "M30\n";
 	}
 
 };
