@@ -16,8 +16,12 @@ public:
 		s << g->Metric();
 			
 		for (Operation *op : operations) {
-			s << g->Comment(op->ToString());
-			s << op->gcode(g);
+			if (op->getTool().isValid()) {
+				s << g->Comment(op->ToString());
+				s << op->gcode(g);
+			} else {
+				ErrorOK(Format(t_("Tool (%s) is not valid parameters!"), op->getTool().ToString()));
+			}
 		}
 
 		s << g->CoolantOff();

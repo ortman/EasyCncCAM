@@ -42,16 +42,20 @@ struct Tool : ValueType<Tool, 10013, Comparable<Tool, Moveable<Tool>>> {
 		v("feedrateZ") = feedRateZ;
 		return v;
 	}
-	int Compare(const Tool& o) const { return CombineCompare((int)type, (int)o.type)(diameter, o.diameter)(length, o.length)(speed, o.speed); }
+	
+	int Compare(const Tool& o) const { return CombineCompare((int)type, (int)o.type)(diameter, o.diameter)(length, o.length); }
+	
 	void Serialize(Stream& s) {
-		//String t = typeToString(type);
 		int t = type;
-		s % t % diameter % length % speed % feedRateXY % feedRateZ;
+		s % t % diameter % length;
 	}
+	
 	String ToString() const {
 		return typeToString(type, true) + " " + DblStr(diameter) + "x" + DblStr(length);
 	}
-	hash_t GetHashValue() const { return CombineHash((int)(type), diameter, length, speed) << feedRateXY << feedRateZ; }
+	
+	hash_t GetHashValue() const { return CombineHash((int)(type), diameter, length); }
+	
 	bool IsNullInstance() const { return IsNull(diameter); }
 	
 	static String typeToString(Type type, bool localize = false) {
@@ -64,6 +68,7 @@ struct Tool : ValueType<Tool, 10013, Comparable<Tool, Moveable<Tool>>> {
 			}
 		}
 	}
+	
 	static Type typeFromString(String type) {
 		if (type == "Mill") return Mill;
 		if (type == "Drill") return Drill;
@@ -109,9 +114,21 @@ struct Tool : ValueType<Tool, 10013, Comparable<Tool, Moveable<Tool>>> {
 		}
 		return *this;
 	}
+	
 	int PolyCompare(const Value& v) const {
 		return Compare(v);
 	}
+	
+	bool isValid() {
+		if (type != Drill && type != Mill) return false;
+		if (diameter <= 0.) return false;
+		if (length <= 0.1) return false;
+		if (speed < 1) return false;
+		if (feedRateXY < 0 || (type == Drill && feedRateXY != 0)) return false;
+		if (feedRateZ <= 0) return false;
+		return true;
+	}
+	
 	static dword ValueTypeNo() { return 10013; }
 };
 
