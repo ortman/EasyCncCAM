@@ -4,6 +4,9 @@
 #include <Core/Core.h>
 using namespace Upp;
 
+#define CMD_STR(C) #C""
+#define CMD_STR_END(C) #C"\n"
+
 class GCode {
 public:
 	enum Flat {
@@ -20,10 +23,21 @@ public:
 		G19,
 		G20,
 		G21,
+		G40,
+		G49,
+		G54, G55, G56, G57, G58, G59,
+		G80,
+		G90,
+		G91,
 		
 		S,
 		
+		T,
+		
+		M3,
+		M4,
 		M5,
+		M6,
 		M8,
 		M9,
 		M30
@@ -32,6 +46,7 @@ public:
 	virtual inline const String Start() { return ""; }
 	virtual inline const String End() { return ""; }
 	virtual inline const String Comment(const String& c) { return ""; }
+	virtual inline const String Label(int num, const String& c) { return ""; }
 	
 	virtual inline const String Move0(double x = NAN, double y = NAN, double z = NAN, double f = NAN) { return ""; }
 	virtual inline const String MoveZ0(double z = NAN, double f = NAN) {
@@ -46,9 +61,17 @@ public:
 	virtual inline const String SetFlat(GCode::Flat f) { return ""; }
 	virtual inline const String Inch() { return ""; }
 	virtual inline const String Metric() { return ""; }
+	virtual inline const String CoordinateSystem(int num) { return ""; }
+	virtual inline const String AbsolutePos() { return ""; }
+	virtual inline const String IncrementPos() { return ""; }
 	virtual inline const String SpindeleOff() { return ""; }
 	virtual inline const String CoolantOn() { return ""; }
 	virtual inline const String CoolantOff() { return ""; }
+	virtual inline const String ToolCompensationOff() { return ""; }
+	virtual inline const String ToolLenCorrectionOff() { return ""; }
+	virtual inline const String CiclesOff() { return ""; }
+	
+	virtual inline const String SetTool(Tool& t) { return ""; }
 
 };
 

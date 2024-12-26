@@ -12,7 +12,14 @@ public:
 		String s;
 		if (g == NULL) return s;
 		s << g->Start();
+		s << g->Label(1, "Program name");
+		s << g->CoordinateSystem(1);
+		s << g->AbsolutePos();
 		s << g->SetFlat(GCode::XY);
+		s << g->ToolCompensationOff();
+		s << g->CiclesOff();
+		//s << G00; // ???
+		s << g->ToolLenCorrectionOff();
 		s << g->Metric();
 			
 		for (Operation *op : operations) {

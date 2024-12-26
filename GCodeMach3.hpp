@@ -34,6 +34,12 @@ public:
 		return String("(") << s << ")\n";
 	}
 	
+	inline const String Label(int num, const String& c) {
+		if (num < 0) num = 0;
+		else if (num > 99999) num = 99999;
+		return String("O") << IntStr(num) << Comment(c);
+	}
+	
 	inline const String Move0(double x = NAN, double y = NAN, double z = NAN, double f = NAN) {
 		String sb;
 		if (lastCMD != G00) sb << " G00";
@@ -91,44 +97,83 @@ public:
 		switch (f) {
 			case XY: {
 				lastCMD = G17;
-				return "G17\n";
+				return CMD_STR_END(G17);
 			}
 			case XZ: {
 				lastCMD = G18;
-				return "G18\n";
+				return CMD_STR_END(G18);
 			}
-			default: {
+			default: {  //YZ
 				lastCMD = G19;
-				return "G19\n";  //YZ
+				return CMD_STR_END(G19);
 			}
 		};
 	}
 	
 	inline const String Inch() {
 		lastCMD = G20;
-		return "G20\n";
+		return CMD_STR_END(G20);
 	}
 	
 	inline const String Metric() {
 		lastCMD = G21;
-		return "G21\n";
+		return CMD_STR_END(G21);
+	}
+	
+	inline const String CoordinateSystem(int num) {
+		if (num < 1 || num > 6) return "";
+		lastCMD = (CMD)(G54 + num - 1);
+		switch (lastCMD) {
+			case G54: return CMD_STR_END(G54);
+			case G55: return CMD_STR_END(G55);
+			case G56: return CMD_STR_END(G56);
+			case G57: return CMD_STR_END(G57);
+			case G58: return CMD_STR_END(G58);
+			default:  return CMD_STR_END(G59);
+		}
+	}
+	
+	inline const String AbsolutePos() {
+		lastCMD = G90;
+		return CMD_STR_END(G90);
+	}
+	
+	inline const String IncrementPos() {
+		lastCMD = G91;
+		return CMD_STR_END(G91);
 	}
 	
 	inline const String SpindeleOff() {
 		lastCMD = M5;
-		return "M5\n";
+		return CMD_STR_END(M5);
 	}
 	
 	inline const String CoolantOn() {
 		if (lastCooland == M8) return "";
 		lastCooland = lastCMD = M8;
-		return "M8\n";
+		return CMD_STR_END(M8);
 	}
 	
 	inline const String CoolantOff() {
 		if (lastCooland == M9) return "";
 		lastCooland = lastCMD = M9;
-		return "M9\n";
+		return CMD_STR_END(M9);
+	}
+	
+	inline const String ToolCompensationOff() {
+		return CMD_STR_END(G40);
+	}
+	
+	inline const String ToolLenCorrectionOff() {
+		return CMD_STR_END(G49);
+	}
+	
+	inline const String CiclesOff() {
+		return CMD_STR_END(G80);
+	}
+	
+	inline const String SetTool(Tool& t) {
+		return "T1 M6\n";
 	}
 
 };

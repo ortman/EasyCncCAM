@@ -99,6 +99,8 @@ public:
 	virtual const String gcode(GCode *g) {
 		String s;
 		calculate();
+		//s << g->CoordinateSystem(1);
+		s << g->SetTool(tool);
 		s << g->RunSpindele(tool.speed);
 		s	<< g->CoolantOn();
 		double d = tool.diameter;
