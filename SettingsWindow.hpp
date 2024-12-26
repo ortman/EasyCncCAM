@@ -6,6 +6,7 @@
 class SettingsWindow : public WithSettingsLayout<TopWindow> {
 private:
 	void updateFields() {
+		eFileExt <<= Settings::fileExt;
 		cViewerBG <<= Settings::viewerBG;
 		cDrillColor <<= Settings::drillColor;
 		eDrillLineWidth <<= Settings::drillLineWidth;
@@ -42,6 +43,10 @@ public:
 		bCancel.WhenPush = [=] {
 			WhenClose();
 		};
+		eFileExt.WhenAction = [=] {
+			Settings::fileExt = ~eFileExt;
+			WhenAction();
+		};
 		cViewerBG.WhenAction = [=] {
 			Settings::viewerBG = ~cViewerBG;
 			WhenAction();
@@ -51,7 +56,7 @@ public:
 			WhenAction();
 		};
 		eDrillLineWidth.WhenAction = [=] {
-			Settings::drillLineWidth = eDrillLineWidth;
+			Settings::drillLineWidth = ~eDrillLineWidth;
 			WhenAction();
 		};
 		cDrillCenterColor.WhenAction = [=] {
@@ -63,19 +68,19 @@ public:
 			WhenAction();
 		};
 		eMeasurersFont.WhenAction = [=] {
-			Settings::measurersFont.Height(eMeasurersFont);
+			Settings::measurersFont.Height(~eMeasurersFont);
 			WhenAction();
 		};
 		eMeasurersLineWidth.WhenAction = [=] {
-			Settings::measurersLineWidth = eMeasurersLineWidth;
+			Settings::measurersLineWidth = ~eMeasurersLineWidth;
 			WhenAction();
 		};
 		eMeasurersArrowSize.WhenAction = [=] {
-			Settings::measurersArrowSize = eMeasurersArrowSize;
+			Settings::measurersArrowSize = ~eMeasurersArrowSize;
 			WhenAction();
 		};
 		eMeasurersArrowAngle.WhenAction = [=] {
-			Settings::measurersArrowAngle = eMeasurersArrowAngle * M_PI / 180.;
+			Settings::measurersArrowAngle = (double)~eMeasurersArrowAngle * M_PI / 180.;
 			WhenAction();
 		};
 	}
