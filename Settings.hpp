@@ -91,6 +91,9 @@ public:
 	static void Load() {
 		RestoreDefault();
 		LoadFromJsonFile(Settings::settings, GetExeDirFile(SETTINGS_FILENAME));
+		if (tools.GetCount() == 0) {
+			tools.Add(Tool(Tool::Drill, 3.2, 10., 6000, 0, 0));
+		}
 	}
 	static void Save() {
 		FileOut out(GetExeDirFile(SETTINGS_FILENAME));
