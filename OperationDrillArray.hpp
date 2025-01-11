@@ -30,7 +30,6 @@ private:
 				drills.Add({startX + x * sx, startY + y * sy});
 			}
 		}
-		calculateDraw();
 	}
 	
 public:
@@ -56,6 +55,17 @@ public:
 		calculate();
 	}
 	
+	Rectf getRect() {
+		double width2 = (size.cx + tool.diameter) / 2;
+		double height2 = (size.cy + tool.diameter) / 2;
+		return {
+			-width2 + center.x,
+			-height2 + center.y,
+			width2 + center.x,
+			height2 + center.y
+		};
+	}
+	
 	Size getCount() {return count;}
 	void setCount(const Size c) {
 		count = c;
@@ -70,36 +80,35 @@ public:
 		calculate();
 	}
 	
-	Sizef getDrawSize() {
-		return {size.cx + tool.diameter + OPERATION_DRAW_OFFSET, size.cy + tool.diameter + OPERATION_DRAW_OFFSET};
-	}
-	
 	virtual String ToString() {
 		return String(t_("Drilling")) + "(" + DblStr(tool.diameter) + " x " + DblStr(depth) + ") " + t_("Array:") + " " + count.ToString();
 	}
 	
-	virtual void calculateDraw() {
-		OperationDrill::calculateDraw();
-		if (isDrawMeasure) {
-			double delta = (tool.diameter + OPERATION_DRAW_OFFSET) / 2.;
-			int xLeft = (int)(delta * scale);
-			int xRight = (int)((size.cx+delta) * scale);
-			int yTop = (int)(delta * scale);
-			int yBottom = (int)((((count.cy > 1) ? size.cy : size.cy / 2. ) + delta) * scale);
+	virtual void Draw(ImageDraw& draw, Size& imgSz, Rectf& viewRect, bool isMeasurers = false, bool isDrawDrillCenter = false) {
+		OperationDrill::Draw(draw, imgSz, viewRect, isMeasurers, isDrawDrillCenter);
+		if (isMeasurers) {
+			Sizef viewSize = viewRect.GetSize();
+			double scale = min(imgSz.cx / viewSize.cx, imgSz.cy / viewSize.cy);
+			double shiftX = viewRect.left * scale - (imgSz.cx - viewSize.cx * scale) / 2.;
+			double shiftY = viewRect.top * scale - (imgSz.cy - viewSize.cy * scale) / 2.;
+			
+			int xLeft = (int)((center.x - size.cx / 2.) * scale - shiftX);
+			int xRight = xLeft + (int)(size.cx * scale);
+			int yBottom =  imgSz.cy - (int)((center.y - size.cy / 2.) * scale - shiftY);
+			int yTop = yBottom - (int)(size.cy * scale);
 			if (count.cx > 1) {
-				DrawMeasureLine(xLeft, yBottom, xRight, yBottom, DblStr(size.cx));
+				DrawMeasureLine(draw, xLeft, yBottom, xRight, yBottom, DblStr(size.cx), tool.diameter / 2. * scale + 10. * Settings::subsampling);
 				if (count.cy > 1) {
-					DrawAlphaPolygon({
+					draw.DrawPolygon({
 						{xLeft, yTop},
 						{xRight, yTop},
 						{xRight, yBottom},
 						{xLeft, yBottom}},
 						Null, Settings::measurersLineWidth, Settings::measurersColor);
-					//DrawMeasureLine(xLeft, yBottom, xRight, yTop);
 				}
 			}
 			if (count.cy > 1) {
-				DrawMeasureLine(xRight, yBottom, xRight, yTop, DblStr(size.cy));
+				DrawMeasureLine(draw, xRight, yBottom, xRight, yTop, DblStr(size.cy), tool.diameter / 2. * scale + 10. * Settings::subsampling);
 			}
 		}
 	}

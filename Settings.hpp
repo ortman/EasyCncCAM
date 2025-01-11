@@ -46,7 +46,8 @@ public:
 						drillColor = ColorFromText((String)v);
 					}
 					if (!(v = viewer["drillLineWidth"]).IsNull()) {
-						drillLineWidth = v;
+						double dlw = v;
+						drillLineWidth = (int)(dlw * Settings::subsampling);
 					}
 					if (!(v = viewer["drillCenterColor"]).IsNull()) {
 						drillCenterColor = ColorFromText((String)v);
@@ -62,10 +63,12 @@ public:
 						}
 					}
 					if (!(v = viewer["measurersLineWidth"]).IsNull()) {
-						measurersLineWidth = v;
+						double mlw = v;
+						measurersLineWidth = (int)(mlw * Settings::subsampling);
 					}
 					if (!(v = viewer["measurersArrowSize"]).IsNull()) {
-						measurersArrowSize = v;
+						double mas = v;
+						measurersArrowSize = (int)(mas * Settings::subsampling);
 					}
 					if (!(v = viewer["measurersArrowAngle"]).IsNull()) {
 						measurersArrowAngle = (double)v * M_PI / 180.;
@@ -92,12 +95,12 @@ public:
 	static void RestoreDefault() {
 		viewerBG = Color(240, 240, 255);
 		drillColor = Blue;
-		drillLineWidth = 2;
+		drillLineWidth = (int)(1.5 * Settings::subsampling);
 		drillCenterColor = LtRed;
 		measurersColor = Black;
-		measurersFont = StdFont(20);
-		measurersLineWidth = 1;
-		measurersArrowSize = 20.;
+		measurersFont = StdFont((int)(20. * Settings::subsampling));
+		measurersLineWidth = (int)(1. * Settings::subsampling);
+		measurersArrowSize = 20. * Settings::subsampling;
 		measurersArrowAngle = M_PI / 10.;
 		fileExt = "TAP";
 	}
@@ -113,6 +116,7 @@ public:
 	static double measurersArrowSize;
 	static double measurersArrowAngle;
 	static String fileExt;
+	static double subsampling;
 };
 
 Settings Settings::settings;
@@ -128,6 +132,7 @@ int Settings::measurersLineWidth = 1;
 double Settings::measurersArrowSize = 20.;
 double Settings::measurersArrowAngle = M_PI / 10.;
 String Settings::fileExt = "TAP";
+double Settings::subsampling = 5./3.;
 
 
 #endif

@@ -32,9 +32,6 @@ public:
 		depth = d;
 		calculate();
 	}
-	Sizef getDrawSize() {
-		return {1., 1.};
-	}
 
 	virtual String ToString() {
 		return String(t_("Milling")) + "(" + DblStr(tool.diameter) + " x " + DblStr(depth) + ")";
