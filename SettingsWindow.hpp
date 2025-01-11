@@ -9,13 +9,13 @@ private:
 		eFileExt <<= Settings::fileExt;
 		cViewerBG <<= Settings::viewerBG;
 		cDrillColor <<= Settings::drillColor;
-		eDrillLineWidth <<= Settings::drillLineWidth;
+		eDrillLineWidth <<= round(Settings::drillLineWidth / Settings::subsampling);
 		cDrillCenterColor <<= Settings::drillCenterColor;
 		cMeasurersColor <<= Settings::measurersColor;
-		eMeasurersFont <<= Settings::measurersFont.GetHeight();
-		eMeasurersLineWidth <<= Settings::measurersLineWidth;
-		eMeasurersArrowSize <<= Settings::measurersArrowSize;
-		eMeasurersArrowAngle <<= Settings::measurersArrowAngle * 180. / M_PI;
+		eMeasurersFont <<= round(Settings::measurersFont.GetHeight() / Settings::subsampling);
+		eMeasurersLineWidth <<= round(Settings::measurersLineWidth / Settings::subsampling);
+		eMeasurersArrowSize <<= round(Settings::measurersArrowSize / Settings::subsampling);
+		eMeasurersArrowAngle <<= Settings::measurersArrowAngle * 360. / M_PI;
 	}
 public:
 	ToolEditor toolEditor;
@@ -56,7 +56,7 @@ public:
 			WhenAction();
 		};
 		eDrillLineWidth.WhenAction = [=] {
-			Settings::drillLineWidth = ~eDrillLineWidth;
+			Settings::drillLineWidth = (int)((int)~eDrillLineWidth * Settings::subsampling);
 			WhenAction();
 		};
 		cDrillCenterColor.WhenAction = [=] {
@@ -68,19 +68,19 @@ public:
 			WhenAction();
 		};
 		eMeasurersFont.WhenAction = [=] {
-			Settings::measurersFont.Height(~eMeasurersFont);
+			Settings::measurersFont.Height((int)((int)~eMeasurersFont * Settings::subsampling));
 			WhenAction();
 		};
 		eMeasurersLineWidth.WhenAction = [=] {
-			Settings::measurersLineWidth = ~eMeasurersLineWidth;
+			Settings::measurersLineWidth = (int)((int)~eMeasurersLineWidth * Settings::subsampling);
 			WhenAction();
 		};
 		eMeasurersArrowSize.WhenAction = [=] {
-			Settings::measurersArrowSize = ~eMeasurersArrowSize;
+			Settings::measurersArrowSize = (int)((int)~eMeasurersArrowSize * Settings::subsampling);
 			WhenAction();
 		};
 		eMeasurersArrowAngle.WhenAction = [=] {
-			Settings::measurersArrowAngle = (double)~eMeasurersArrowAngle * M_PI / 180.;
+			Settings::measurersArrowAngle = (double)~eMeasurersArrowAngle * M_PI / 360.;
 			WhenAction();
 		};
 	}

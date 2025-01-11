@@ -12,20 +12,25 @@ public:
 	void Jsonize(JsonIO& jio) {
 		if (jio.IsStoring()) {
 			JsonIO viewer;
-			double arrowAngleGrad = measurersArrowAngle * 180. / M_PI;
+			double arrowAngleGrad = measurersArrowAngle * 360. / M_PI;
 			String colorBG = ColorToHtml(viewerBG);
 			String colorC = ColorToHtml(drillColor);
 			String colorDC = ColorToHtml(drillCenterColor);
 			String colorM = ColorToHtml(measurersColor);
+			int saveDLW = round(drillLineWidth / subsampling);
+			int saveMLW = round(measurersLineWidth / subsampling);
+			int saveMAS = round(measurersArrowSize / subsampling);
+			Font saveMF = measurersFont;
+			saveMF.Height(round(saveMF.GetHeight() / subsampling));
 			viewer
 				("background", colorBG)
 				("drillColor", colorC)
-				("drillLineWidth", drillLineWidth)
+				("drillLineWidth", saveDLW)
 				("drillCenterColor", colorDC)
 				("measurersColor", colorM)
-				("measurersFont", measurersFont)
-				("measurersLineWidth", measurersLineWidth)
-				("measurersArrowSize", measurersArrowSize)
+				("measurersFont", saveMF)
+				("measurersLineWidth", saveMLW)
+				("measurersArrowSize", saveMAS)
 				("measurersArrowAngle", arrowAngleGrad);
 			jio("tools", tools)("fileExt", fileExt);
 			jio.Set("viewer", viewer.GetResult());
@@ -61,6 +66,7 @@ public:
 						if (measurersFont == Null) {
 							measurersFont = StdFont(20);
 						}
+						measurersFont.Height((int)(measurersFont.GetHeight() * Settings::subsampling));
 					}
 					if (!(v = viewer["measurersLineWidth"]).IsNull()) {
 						double mlw = v;
@@ -71,7 +77,7 @@ public:
 						measurersArrowSize = (int)(mas * Settings::subsampling);
 					}
 					if (!(v = viewer["measurersArrowAngle"]).IsNull()) {
-						measurersArrowAngle = (double)v * M_PI / 180.;
+						measurersArrowAngle = (double)v * M_PI / 360.;
 					}
 				}
 				if (!(v = j["fileExt"]).IsNull()) {
@@ -95,12 +101,12 @@ public:
 	static void RestoreDefault() {
 		viewerBG = Color(240, 240, 255);
 		drillColor = Blue;
-		drillLineWidth = (int)(1.5 * Settings::subsampling);
+		drillLineWidth = (int)(2. * Settings::subsampling);
 		drillCenterColor = LtRed;
 		measurersColor = Black;
-		measurersFont = StdFont((int)(20. * Settings::subsampling));
+		measurersFont = StdFont((int)(15. * Settings::subsampling));
 		measurersLineWidth = (int)(1. * Settings::subsampling);
-		measurersArrowSize = 20. * Settings::subsampling;
+		measurersArrowSize = 15. * Settings::subsampling;
 		measurersArrowAngle = M_PI / 10.;
 		fileExt = "TAP";
 	}
@@ -127,9 +133,9 @@ Color Settings::drillColor = Blue;
 int Settings::drillLineWidth = 2;
 Color Settings::drillCenterColor = LtRed;
 Color Settings::measurersColor = Black;
-Font Settings::measurersFont = StdFont(20);
+Font Settings::measurersFont = StdFont(15);
 int Settings::measurersLineWidth = 1;
-double Settings::measurersArrowSize = 20.;
+double Settings::measurersArrowSize = 15.;
 double Settings::measurersArrowAngle = M_PI / 10.;
 String Settings::fileExt = "TAP";
 double Settings::subsampling = 5./3.;
