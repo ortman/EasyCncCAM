@@ -84,9 +84,6 @@ EasyCncCAM::EasyCncCAM() {
 		} else if (Settings::tools.GetCount() > 0) {
 			o->setTool(Settings::tools[0]);
 		}
-		
-		o->setDrawDrillCenter(viewer.GetDrawDrillCenter());
-		o->setDrawMeasure(viewer.GetDrawMeasure());
 		operations.Add(o);
 		clOperations.Add((int64)o);
 		clOperations.SetCursor(clOperations.GetCount()-1);
@@ -151,23 +148,15 @@ EasyCncCAM::EasyCncCAM() {
 	};
 	settingsWindow.WhenClose = [=] {
 		settingsWindow.Close();
-		for (Operation* op : operations) {
-			op->calculateDraw();
-		}
 		viewer.Refresh();
 	};
 	settingsWindow.WhenAction = [=] {
-		for (Operation* op : operations) {
-			op->calculateDraw();
-		}
 		viewer.Refresh();
 	};
 	
 	if (Settings::tools.GetCount() > 0) {
 		OperationDrillArray *op = new OperationDrillArray();
 		op->setTool(Settings::tools[0]);
-		op->setDrawMeasure(viewer.GetDrawMeasure());
-		op->setDrawDrillCenter(viewer.GetDrawDrillCenter());
 		currentOperation = op;
 		operations.Add(currentOperation);
 		clOperations.Add((int64)currentOperation);
@@ -228,8 +217,6 @@ void EasyCncCAM::updateOperationTab() {
 		case 0: {
 			OperationDrill *op = operationArrayTab.setOperation(currentOperation);
 			if (op) { // transform operation
-				op->setDrawDrillCenter(viewer.GetDrawDrillCenter());
-				op->setDrawMeasure(viewer.GetDrawMeasure());
 				int idx = FindOperation(currentOperation);
 				if (idx >= 0) {
 					operations[idx] = op;
@@ -243,8 +230,6 @@ void EasyCncCAM::updateOperationTab() {
 		case 1: {
 			OperationDrill *op = operationRoundlessTab.setOperation(currentOperation);
 			if (op) { // transform operation
-				op->setDrawDrillCenter(viewer.GetDrawDrillCenter());
-				op->setDrawMeasure(viewer.GetDrawMeasure());
 				int idx = FindOperation(currentOperation);
 				if (idx >= 0) {
 					operations[idx] = op;
@@ -258,7 +243,6 @@ void EasyCncCAM::updateOperationTab() {
 		case 2: {
 			OperationMilling *op = operationMillingTab.setOperation(currentOperation);
 			if (op) { // transform operation
-				op->setDrawMeasure(viewer.GetDrawMeasure());
 				int idx = FindOperation(currentOperation);
 				if (idx >= 0) {
 					operations[idx] = op;

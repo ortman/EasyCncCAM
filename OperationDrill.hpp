@@ -8,50 +8,42 @@ protected:
 	Vector<Pointf> drills;
 	double depth = 10.;
 	Pointf center = {0., 0.};
-	bool isDrawDrillCenter = false;
 	OperationDrill(){};
 	
-	virtual void calculateDraw() {
-		Sizef size = getDrawSize();
-		this->shiftDraw = {center.x - size.cx/2, center.y - size.cy/2};
-		Size imgSize = {(int)(size.cx * scale), (int)(size.cy * scale)};
-		if (draw) delete draw;
-		draw = new ImageDraw(imgSize);
-		if (draw == NULL) return;
-		//draw->Alpha().DrawRect({0, 0, (int)(imgSize.cx), (int)(imgSize.cy)}, GrayColor(100));
-		//draw->DrawRect({0, 0, (int)(imgSize.cx), (int)(imgSize.cy)}, LtGreen());
-
-		double diameter = tool.diameter * scale;
-		double radius = diameter / 2.;
+public:
+	virtual void Draw(ImageDraw& draw, Size& imgSz, Rectf& viewRect, bool isMeasurers = false, bool isDrawDrillCenter = false) {
+		Sizef viewSize = viewRect.GetSize();
+		double scale = min(imgSz.cx / viewSize.cx, imgSz.cy / viewSize.cy);
+		double shiftX = viewRect.left * scale - (imgSz.cx - viewSize.cx * scale) / 2.;
+		double shiftY = viewRect.top * scale - (imgSz.cy - viewSize.cy * scale) / 2.;
+		double diameterScaled = tool.diameter * scale;
+		int radiusScaled = (int)(diameterScaled / 2.);
 		int x, y;
 		for (Pointf pd : drills) {
-			x = (int)((pd.x - shiftDraw.x) * scale - radius);
-			y = (int)((pd.y - shiftDraw.y) * scale - radius);
-			DrawAlphaEllipse(x, y, (int)(diameter), (int)(diameter), Null, Settings::drillLineWidth, Settings::drillColor);
+			x = (int)(pd.x * scale - shiftX);
+			y = imgSz.cy - (int)(pd.y * scale - shiftY);
+			if (viewRect.Contains(pd)) {
+				draw.DrawEllipse(x - radiusScaled, y - radiusScaled, (int)diameterScaled, (int)diameterScaled, Null, Settings::drillLineWidth, Settings::drillColor);
+			}
 			if (isDrawDrillCenter) {
-				DrawAlphaLine(
-					(int)((pd.x - shiftDraw.x) * scale),
-					(int)((pd.y - shiftDraw.y - 3) * scale - radius),
-					(int)((pd.x - shiftDraw.x) * scale),
-					(int)((pd.y - shiftDraw.y + 3) * scale + radius),
+				int radiusDrillCenter = radiusScaled + (int)(5. * Settings::subsampling);
+				draw.DrawLine(
+					x, y - radiusDrillCenter,
+					x, y + radiusDrillCenter,
 					Settings::measurersLineWidth, Settings::drillCenterColor);
-				DrawAlphaLine(
-					(int)((pd.x - shiftDraw.x - 3) * scale - radius),
-					(int)((pd.y - shiftDraw.y) * scale),
-					(int)((pd.x - shiftDraw.x + 3) * scale + radius),
-					(int)((pd.y - shiftDraw.y) * scale),
+				draw.DrawLine(
+					x - radiusDrillCenter, y,
+					x + radiusDrillCenter, y,
 					Settings::measurersLineWidth, Settings::drillCenterColor);
 			}
 		}
-		if (isDrawMeasure) {
+		if (isMeasurers) {
 			if (drills.GetCount() > 0) {
 				Pointf &d = drills[0];
-				DrawMeasureDiameter(d.x, d.y, tool.diameter);
+				DrawMeasureDiameter(draw, d.x * scale - shiftX, imgSz.cy - (d.y * scale - shiftY), diameterScaled, ("Ø" + DblStr(tool.diameter)));
 			}
 		}
 	}
-	
-public:
 	
 	OperationDrill(Operation* operation) {
 		tool = operation->getTool();
@@ -59,7 +51,6 @@ public:
 		if (dr) {
 			depth = dr->depth;
 			center = dr->center;
-			isDrawDrillCenter = dr->isDrawDrillCenter;
 		} else {
 //			OperationMilling *ml = dynamic_cast<OperationMilling*>(operation);
 //			if (ml) {
@@ -83,14 +74,6 @@ public:
 	double getDepth() {return depth;}
 	
 	void setDepth(double d) {depth = d;}
-		
-	//virtual void calculateDrills() {};
-	
-	bool getDrawDrillCenter() {return isDrawDrillCenter;}
-	void setDrawDrillCenter(bool b = true) {
-		isDrawDrillCenter = b;
-		calculate();
-	}
 		
 	virtual String ToString() {
 		return String(t_("Drill(")) + DblStr(tool.diameter) + "x" + DblStr(depth) + ")";

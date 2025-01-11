@@ -24,7 +24,6 @@ private:
 				center.y + radius * sin(startAngle * M_PI/180. + shiftAngle*i)
 			});
 		}
-		calculateDraw();
 	}
 	
 public:
@@ -74,85 +73,105 @@ public:
 		calculate();
 	}
 	
-	Sizef getDrawSize() {
-		double width = radius * 2. + tool.diameter + OPERATION_DRAW_OFFSET;
-		return {width, width};
+	Rectf getRect() {
+		double width2 = (radius * 2. + tool.diameter) / 2.;
+		double height2 = (radius * 2. + tool.diameter) / 2.;
+		return {
+			-width2 + center.x,
+			-height2 + center.y,
+			width2 + center.x,
+			height2 + center.y
+		};
 	}
 	
 	virtual String ToString() {
 		return String(t_("Drilling")) + "(" + DblStr(tool.diameter) + " x " + DblStr(depth) + ") " + t_("Radius:") + " " + DblStr(radius) + ", " + t_("Count:") + " " + IntStr(count);
 	}
 	
-	virtual void calculateDraw() {
-		OperationDrill::calculateDraw();
-		if (isDrawMeasure) {
+	virtual void Draw(ImageDraw& draw, Size& imgSz, Rectf& viewRect, bool isMeasurers = false, bool isDrawDrillCenter = false) {
+		OperationDrill::Draw(draw, imgSz, viewRect, isMeasurers, isDrawDrillCenter);
+		if (isMeasurers) {
+			Sizef viewSize = viewRect.GetSize();
+			double scale = min(imgSz.cx / viewSize.cx, imgSz.cy / viewSize.cy);
+			double shiftX = viewRect.left * scale - (imgSz.cx - viewSize.cx * scale) / 2.;
+			double shiftY = viewRect.top * scale - (imgSz.cy - viewSize.cy * scale) / 2.;
+			double radiusScale = radius * scale;
+			int diameterScale = (int)(radiusScale * 2.);
 			if (sector > 0. && sector < 360.) {
-				double radiusArc = radius/2.;
-				Size ds = getDrawSize();
+				double radiusArc = radiusScale/2.;
 				Pointf c = Pointf(
-					center.x - shiftDraw.x,
-					center.y - shiftDraw.y
+					center.x * scale - shiftX,
+					imgSz.cy - (center.y * scale - shiftY)
+				);
+				draw.DrawArc(RectC(
+						(int)(c.x - radiusArc),
+						(int)(c.y - radiusArc),
+						(int)(radiusArc * 2.),
+						(int)(radiusArc * 2.)
+					),
+					Point(
+						(int)((c.x + radiusArc * cos(startAngle * M_PI/180.))),
+						(int)((c.y + radiusArc * sin(-startAngle * M_PI/180.)))
+					),
+					Point(
+						(int)((c.x + radiusArc * cos((sector + startAngle) * M_PI/180.))),
+						(int)((c.y + radiusArc * sin((-sector - startAngle) * M_PI/180.)))
+					),
+					Settings::measurersLineWidth, Settings::measurersColor
+				);
+				
+				draw.DrawLine(
+					(int)(c.x),
+					(int)(c.y),
+					(int)((c.x + radiusScale * cos((sector + startAngle) * M_PI/180.))),
+					(int)((c.y + radiusScale * sin((-sector - startAngle) * M_PI/180.))),
+					Settings::measurersLineWidth, Settings::measurersColor
+				);
+				draw.DrawLine(
+					(int)(c.x),
+					(int)(c.y),
+					(int)((c.x + radiusScale * cos(startAngle * M_PI/180.))),
+					(int)((c.y + radiusScale * sin(-startAngle * M_PI/180.))),
+					Settings::measurersLineWidth, Settings::measurersColor
+				);
+				draw.DrawArc(RectC(
+						(int)(c.x - radiusScale),
+						(int)(c.y - radiusScale),
+						diameterScale,
+						diameterScale
+					),
+					Point(
+						(int)((c.x + radiusScale * cos(startAngle * M_PI/180.))),
+						(int)((c.y + radiusScale * sin(-startAngle * M_PI/180.)))
+					),
+					Point(
+						(int)((c.x + radiusScale * cos((sector + startAngle) * M_PI/180.))),
+						(int)((c.y + radiusScale * sin((-sector - startAngle) * M_PI/180.)))
+					),
+					Settings::measurersLineWidth, Settings::measurersColor
+				);
+				DrawMeasureRadius(draw,
+					center.x * scale - shiftX,
+					imgSz.cy - (center.y * scale - shiftY),
+					radiusScale,
+					"R" + DblStr(radius),
+					startAngle + sector / 2.
 				);
 				String textAngle = DblStr(sector) + "°";
 				Size textAngleSz = GetTextSize(textAngle, Settings::measurersFont);
-				DrawAlphaArc(RectC(
-						(int)((c.x - radiusArc) * scale),
-						(int)((c.y - radiusArc) * scale),
-						(int)(radiusArc * 2. * scale),
-						(int)(radiusArc * 2. * scale)
-					),
-					Point(
-						(int)((c.x + radiusArc * cos((sector + startAngle) * M_PI/180.)) * scale),
-						(int)((c.y + radiusArc * sin((sector + startAngle) * M_PI/180.)) * scale)
-					),
-					Point(
-						(int)((c.x + radiusArc * cos(startAngle * M_PI/180.)) * scale),
-						(int)((c.y + radiusArc * sin(startAngle * M_PI/180.)) * scale)
-					),
-					Settings::measurersLineWidth, Settings::measurersColor
-				);
-				DrawAlphaLine(
-					(int)(c.x * scale),
-					(int)(c.y * scale),
-					(int)((c.x + radius * cos((sector + startAngle) * M_PI/180.)) * scale),
-					(int)((c.y + radius * sin((sector + startAngle) * M_PI/180.)) * scale),
-					Settings::measurersLineWidth, Settings::measurersColor
-				);
-				DrawAlphaLine(
-					(int)(c.x * scale),
-					(int)(c.y * scale),
-					(int)((c.x + radius * cos(startAngle * M_PI/180.)) * scale),
-					(int)((c.y + radius * sin(startAngle * M_PI/180.)) * scale),
-					Settings::measurersLineWidth, Settings::measurersColor
-				);
-				DrawAlphaArc(RectC(
-						(int)((c.x - radius) * scale),
-						(int)((c.y - radius) * scale),
-						(int)(radius * 2 * scale),
-						(int)(radius * 2 * scale)
-					),
-					Point(
-						(int)((c.x + radius * cos((sector + startAngle) * M_PI/180.)) * scale),
-						(int)((c.y + radius * sin((sector + startAngle) * M_PI/180.)) * scale)
-					),
-					Point(
-						(int)((c.x + radius * cos(startAngle * M_PI/180.)) * scale),
-						(int)((c.y + radius * sin(startAngle * M_PI/180.)) * scale)
-					),
-					Settings::measurersLineWidth, Settings::measurersColor
-				);
-				DrawMeasureRadius(center.x, center.y, radius, -startAngle - sector / 2.);
-				DrawAlphaTextA(
-					(int)((c.x + (radiusArc+2) * cos((-sector/2 - startAngle) * M_PI/180.)) * scale - textAngleSz.cx/2.),
-					(int)((c.y + (radiusArc+2) * sin((sector/2. + startAngle) * M_PI/180.)) * scale - textAngleSz.cy/2.),
+				draw.DrawTextA(
+					(int)((c.x + (radiusArc+20.) * cos((-sector/2. - startAngle) * M_PI/180.)) - textAngleSz.cx/2.),
+					(int)((c.y + (radiusArc+20.) * sin((-sector/2. - startAngle) * M_PI/180.)) - textAngleSz.cy/2.),
 					0, textAngle, Settings::measurersFont, Settings::measurersColor);
+					
 			} else {
-				double delta = (tool.diameter + OPERATION_DRAW_OFFSET)/2.;
-				DrawAlphaEllipse(
-					(int)(delta * scale), (int)(delta * scale),
-					(int)((radius*2.) * scale), (int)((radius*2.) * scale),
+				draw.DrawEllipse(
+					(int)(center.x * scale - shiftX - radiusScale),
+					(int)(imgSz.cy - (center.y * scale - shiftY + radiusScale)),
+					diameterScale,
+					diameterScale,
 					Null, Settings::measurersLineWidth, Settings::measurersColor);
-					DrawMeasureRadius(center.x, center.y, radius);
+				DrawMeasureRadius(draw, center.x * scale - shiftX, imgSz.cy - (center.y * scale - shiftY), radiusScale, "R" + DblStr(radius));
 			}
 		}
 	}
