@@ -159,7 +159,7 @@ public:
 				);
 				String textAngle = DblStr(sector) + "°";
 				Size textAngleSz = GetTextSize(textAngle, Settings::measurersFont);
-				draw.DrawTextA(
+				draw.DrawText(
 					(int)((c.x + (radiusArc+20.) * cos((-sector/2. - startAngle) * M_PI/180.)) - textAngleSz.cx/2.),
 					(int)((c.y + (radiusArc+20.) * sin((-sector/2. - startAngle) * M_PI/180.)) - textAngleSz.cy/2.),
 					0, textAngle, Settings::measurersFont, Settings::measurersColor);

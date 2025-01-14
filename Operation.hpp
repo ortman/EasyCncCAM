@@ -37,7 +37,7 @@ protected:
 		double yD = (radius + 30.) * sin(anglePI);
 		int leftAngle = (int)abs(angle) % 360;
 		bool leftText = leftAngle > 90 && leftAngle < 270;
-		draw.DrawTextA(
+		draw.DrawText(
 			(int)((x + xD) - (leftText ? textSize.cx : 0)),
 			(int)((y - yD) - textSize.cy),
 			0, text, Settings::measurersFont, Settings::measurersColor);
@@ -64,7 +64,7 @@ protected:
 		double yD = (radius + 30.) * sin(anglePI);
 		int leftAngle = (int)abs(angle) % 360;
 		bool leftText = leftAngle > 90 && leftAngle < 270;
-		draw.DrawTextA(
+		draw.DrawText(
 			(int)((x + xD) - (leftText ? textSize.cx : -1)),
 			(int)((y - yD) - textSize.cy),
 			0, text, Settings::measurersFont, Settings::measurersColor);
@@ -102,7 +102,7 @@ protected:
 		int eX = (int)(sX + len * cos(angle));
 		int eY = (int)(sY + len * sin(angle));
 		double txtShiftLen = (len - txtSz.cx) / 2.;
-		draw.DrawTextA((int)(sX + txtShiftLen * cos(angle)), (int)(sY + txtShiftLen * sin(angle)), (int)(angle*-1800./M_PI), str, Settings::measurersFont, Settings::measurersColor);
+		draw.DrawText((int)(sX + txtShiftLen * cos(angle)), (int)(sY + txtShiftLen * sin(angle)), (int)(angle*-1800./M_PI), str, Settings::measurersFont, Settings::measurersColor);
 		draw.DrawLine(sX, sY, eX, eY, Settings::measurersLineWidth, Settings::measurersColor);
 		draw.DrawLine(x1, y1, (int)(x1 + shiftV * cos(angle+M_PI_2)), (int)(y1 + shiftV * sin(angle+M_PI_2)), Settings::measurersLineWidth, Settings::measurersColor);
 		draw.DrawLine(x2, y2, (int)(x2 + shiftV * cos(angle+M_PI_2)), (int)(y2 + shiftV * sin(angle+M_PI_2)), Settings::measurersLineWidth, Settings::measurersColor);
