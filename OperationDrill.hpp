@@ -6,7 +6,6 @@
 class OperationDrill : public Operation {
 protected:
 	Vector<Pointf> drills;
-	double depth = 10.;
 	Pointf center = {0., 0.};
 	OperationDrill(){};
 	
@@ -47,20 +46,13 @@ public:
 	
 	OperationDrill(Operation* operation) {
 		tool = operation->getTool();
+		depth = operation->getDepth();
 		OperationDrill *dr = dynamic_cast<OperationDrill*>(operation);
 		if (dr) {
-			depth = dr->depth;
 			center = dr->center;
-		} else {
-//			OperationMilling *ml = dynamic_cast<OperationMilling*>(operation);
-//			if (ml) {
-//				drill = ml->getTool();
-//				depth = ml->getDepth();
-//			}
 		}
 	}
 
-	
 	~OperationDrill(){};
 	
 	Pointf getCenter() {return center;}
@@ -70,10 +62,6 @@ public:
 	}
 	
 	Vector<Pointf>& getDrills() {return drills;}
-		
-	double getDepth() {return depth;}
-	
-	void setDepth(double d) {depth = d;}
 		
 	virtual String ToString() {
 		return String(t_("Drill(")) + DblStr(tool.diameter) + "x" + DblStr(depth) + ")";

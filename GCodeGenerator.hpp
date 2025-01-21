@@ -37,6 +37,52 @@ public:
 
 		return s;
 	}
+
+	static String GenerateFileName(const Vector<Operation*> &operations) {
+		Tool tool;
+		double depth = 0.;
+		int count = 0;
+		OperationDrill *dr;
+		for (Operation* o : operations) {
+			if (tool.diameter == 0.) tool = o->getTool();
+			if (tool == o->getTool()) {
+				if (o->getDepth() > depth) depth = o->getDepth();
+				dr = dynamic_cast<OperationDrill*>(o);
+				if (dr) {
+					count += dr->getDrills().GetCount();
+				}
+			}
+		}
+		if (count) {
+			return Format("D%0.4g`x%0.5g(%i).", tool.diameter, depth, count) + Settings::fileExt;
+		} else {
+			return Format("D%0.4g`x%0.5g.", tool.diameter, depth) + Settings::fileExt;
+		}
+	}
+
+	static String GetSaveDirectory() {
+		Array<FileSystemInfo::FileInfo> root;
+		#ifdef PLATFORM_WIN32
+			root = StdFileSystemInfo().Find(Null);
+			for (int i = 0; i < root.GetCount(); i++) {
+				String n = root[i].filename;
+				if (n != "A:\\" && n != "B:\\" && root[i].root_style == FileSystemInfo::ROOT_REMOVABLE) {
+					return n;
+				}
+			}
+		#endif
+
+		#ifdef PLATFORM_POSIX
+			root = StdFileSystemInfo().Find("/media/*");
+			for (int i = 0; i < root.GetCount(); i++) {
+				String fn = root[i].filename;
+				if (*fn != '.' && fn.Find("floppy") < 0)
+					return "/media/" + fn;
+			}
+		#endif
+
+		return "";
+	}
 };
 
 #endif

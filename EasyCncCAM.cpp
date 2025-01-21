@@ -35,6 +35,7 @@ EasyCncCAM::EasyCncCAM() {
 	menu.Set([=](Bar &bar) {
 		bar.Sub(t_("File"), [=](Bar &bar) {
 			bar.Add(t_("Generate CAM"), [=] {
+				bGenerate.WhenPush();
 			});
 			bar.Add(t_("Tool editor"), [=] {
 				if (settingsWindow.toolEditor.IsOpen()) {
@@ -171,6 +172,9 @@ EasyCncCAM::EasyCncCAM() {
 	clOperations.SetCursor(clOperations.GetCount()-1);
 	
 	bGenerate.WhenPush = [=] {
+		String dir = GCodeGenerator::GetSaveDirectory();
+		if (!dir.IsEmpty()) sel.ActiveDir(dir);
+		sel.Set(GCodeGenerator::GenerateFileName(operations));
 		if (sel.ExecuteSaveAs() && !sel.Get().IsEmpty()) {
 			FileOut f;
 			if (f.Open(~sel)) {

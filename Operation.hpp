@@ -14,6 +14,7 @@ using namespace Upp;
 class Operation : public Moveable<Operation> {
 protected:
 	Tool tool;
+	double depth = 10.;
 	double safeToolH = -5.;
 		
 	void DrawMeasureArrow(ImageDraw& draw, int x, int y, double angle) {
@@ -127,6 +128,8 @@ public:
 		this->tool = tool;
 		calculate();
 	}
+	double getDepth() {return depth;}
+	void setDepth(double d) {depth = d;}
 	virtual const String gcode(GCode *g) {
 		return "";
 	}
