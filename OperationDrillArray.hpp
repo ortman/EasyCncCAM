@@ -97,7 +97,6 @@ public:
 			int yBottom =  imgSz.cy - (int)((center.y - size.cy / 2.) * scale - shiftY);
 			int yTop = yBottom - (int)(size.cy * scale);
 			if (count.cx > 1) {
-				DrawMeasureLine(draw, xLeft, yBottom, xRight, yBottom, DblStr(size.cx), tool.diameter / 2. * scale + 10. * Settings::subsampling);
 				if (count.cy > 1) {
 					draw.DrawPolygon({
 						{xLeft, yTop},
@@ -105,7 +104,12 @@ public:
 						{xRight, yBottom},
 						{xLeft, yBottom}},
 						Null, Settings::measurersLineWidth, Settings::measurersColor);
+				} else {
+					yBottom =  imgSz.cy - (int)(center.y * scale - shiftY);
 				}
+				DrawMeasureLine(draw, xLeft, yBottom, xRight, yBottom, DblStr(size.cx), tool.diameter / 2. * scale + 10. * Settings::subsampling);
+			} else {
+				xRight = (int)(center.x * scale - shiftX);
 			}
 			if (count.cy > 1) {
 				DrawMeasureLine(draw, xRight, yBottom, xRight, yTop, DblStr(size.cy), tool.diameter / 2. * scale + 10. * Settings::subsampling);
