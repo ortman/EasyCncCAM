@@ -14,7 +14,7 @@ using namespace Upp;
 class Operation : public Moveable<Operation> {
 protected:
 	Tool tool;
-	double depth = 10.;
+	double depth = Null;
 	double safeToolH = -5.;
 		
 	void DrawMeasureArrow(ImageDraw& draw, int x, int y, double angle) {

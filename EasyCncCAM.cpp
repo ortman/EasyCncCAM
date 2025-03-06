@@ -88,7 +88,11 @@ EasyCncCAM::EasyCncCAM() {
 		operations.Add(o);
 		clOperations.Add((int64)o);
 		clOperations.SetCursor(clOperations.GetCount()-1);
-		viewer.Refresh();
+		if (Settings::viewerAutoRescale) {
+			viewer.showAllView();
+		} else {
+			viewer.Refresh();
+		}
 	};
 	
 	clOperations.SetDisplay(operationListDisplay);
@@ -128,7 +132,11 @@ EasyCncCAM::EasyCncCAM() {
 	operationArrayTab.WhenAction =
 	operationRoundlessTab.WhenAction =
 	operationMillingTab.WhenAction = [=] {
-		viewer.Refresh();
+		if (Settings::viewerAutoRescale) {
+			viewer.showAllView();
+		} else {
+			viewer.Refresh();
+		}
 		clOperations.Refresh();
 	};
 	
@@ -258,7 +266,11 @@ void EasyCncCAM::updateOperationTab() {
 			break;
 		}
 	}
-	viewer.Refresh();
+	if (Settings::viewerAutoRescale) {
+		viewer.showAllView();
+	} else {
+		viewer.Refresh();
+	}
 }
 
 void EasyCncCAM::OperationListDisplay::Paint(Draw& w, const Rect& r, const Value& q, Color ink, Color paper, dword style) const {

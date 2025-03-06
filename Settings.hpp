@@ -17,11 +17,11 @@ public:
 			String colorC = ColorToHtml(drillColor);
 			String colorDC = ColorToHtml(drillCenterColor);
 			String colorM = ColorToHtml(measurersColor);
-			int saveDLW = round(drillLineWidth / subsampling);
-			int saveMLW = round(measurersLineWidth / subsampling);
-			int saveMAS = round(measurersArrowSize / subsampling);
+			int saveDLW = (int)(round(drillLineWidth / subsampling));
+			int saveMLW = (int)(round(measurersLineWidth / subsampling));
+			int saveMAS = (int)(round(measurersArrowSize / subsampling));
 			Font saveMF = measurersFont;
-			saveMF.Height(round(saveMF.GetHeight() / subsampling));
+			saveMF.Height((int)(round(saveMF.GetHeight() / subsampling)));
 			viewer
 				("background", colorBG)
 				("drillColor", colorC)
@@ -31,7 +31,8 @@ public:
 				("measurersFont", saveMF)
 				("measurersLineWidth", saveMLW)
 				("measurersArrowSize", saveMAS)
-				("measurersArrowAngle", arrowAngleGrad);
+				("measurersArrowAngle", arrowAngleGrad)
+				("viewerAutoRescale", viewerAutoRescale);
 			jio("tools", tools)("fileExt", fileExt);
 			jio.Set("viewer", viewer.GetResult());
 		} else {
@@ -79,6 +80,9 @@ public:
 					if (!(v = viewer["measurersArrowAngle"]).IsNull()) {
 						measurersArrowAngle = (double)v * M_PI / 360.;
 					}
+					if (!(v = viewer["viewerAutoRescale"]).IsNull()) {
+						viewerAutoRescale = (bool)v;
+					}
 				}
 				if (!(v = j["fileExt"]).IsNull()) {
 					fileExt = (String)v;
@@ -111,6 +115,7 @@ public:
 		measurersLineWidth = (int)(1. * Settings::subsampling);
 		measurersArrowSize = 15. * Settings::subsampling;
 		measurersArrowAngle = M_PI / 10.;
+		viewerAutoRescale = false;
 		fileExt = "TAP";
 	}
 	
@@ -126,6 +131,7 @@ public:
 	static double measurersArrowAngle;
 	static String fileExt;
 	static double subsampling;
+	static bool viewerAutoRescale;
 };
 
 Settings Settings::settings;
@@ -142,6 +148,7 @@ double Settings::measurersArrowSize = 15.;
 double Settings::measurersArrowAngle = M_PI / 10.;
 String Settings::fileExt = "TAP";
 double Settings::subsampling = 5./3.;
+bool Settings::viewerAutoRescale = true;
 
 
 #endif

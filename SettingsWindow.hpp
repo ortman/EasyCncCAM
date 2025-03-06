@@ -16,6 +16,7 @@ private:
 		eMeasurersLineWidth <<= round(Settings::measurersLineWidth / Settings::subsampling);
 		eMeasurersArrowSize <<= round(Settings::measurersArrowSize / Settings::subsampling);
 		eMeasurersArrowAngle <<= Settings::measurersArrowAngle * 360. / M_PI;
+		oViewerAutoRescale <<= Settings::viewerAutoRescale;
 	}
 public:
 	ToolEditor toolEditor;
@@ -82,6 +83,9 @@ public:
 		eMeasurersArrowAngle.WhenAction = [=] {
 			Settings::measurersArrowAngle = (double)~eMeasurersArrowAngle * M_PI / 360.;
 			WhenAction();
+		};
+		oViewerAutoRescale.WhenAction = [=] {
+			Settings::viewerAutoRescale = ~oViewerAutoRescale;
 		};
 	}
 

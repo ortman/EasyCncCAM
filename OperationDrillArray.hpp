@@ -6,6 +6,7 @@
 class OperationDrillArray : public OperationDrill {
 	Sizef size;
 	Size count;
+	bool onCenter;
 	
 private:
 	void calculate() {
@@ -13,17 +14,17 @@ private:
 		double sx, sy, startX, startY;
 		if (count.cx > 1) {
 			sx = size.cx / (count.cx-1);
-			startX = center.x - size.cx/2;
+			startX = onCenter ? center.x - size.cx / 2 : 0;
 		} else {
 			sx = 0;
-			startX = center.x;
+			startX = onCenter ? center.x : 0;
 		}
 		if (count.cy > 1) {
 			sy = size.cy / (count.cy-1);
-			startY = center.y - size.cy/2;
+			startY = onCenter ? center.y - size.cy / 2 : 0;
 		} else {
 			sy = 0;
-			startY = center.y;
+			startY = onCenter ? center.y : 0;
 		}
 		for (int x = 0; x < count.cx; ++x) {
 			for (int y = 0; y < count.cy; ++y) {
@@ -36,16 +37,19 @@ public:
 	OperationDrillArray() {
 		size = {30., 20.};
 		count = {3, 2};
+		onCenter = false;
 		calculate();
 	}
 	
 	OperationDrillArray(Operation *operation) : OperationDrill(operation) {
 		size = {30., 20.};
 		count = {3, 2};
+		onCenter = false;
 		calculate();
 	}
 	
 	OperationDrillArray(Pointf center, Sizef size, Size count) {
+		onCenter = false;
 		setArray(center, size, count);
 	}
 	
@@ -56,14 +60,24 @@ public:
 	}
 	
 	Rectf getRect() {
-		double width2 = (size.cx + tool.diameter) / 2;
-		double height2 = (size.cy + tool.diameter) / 2;
-		return {
-			-width2 + center.x,
-			-height2 + center.y,
-			width2 + center.x,
-			height2 + center.y
-		};
+		if (onCenter) {
+			double width2 = (size.cx + tool.diameter) / 2.;
+			double height2 = (size.cy + tool.diameter) / 2.;
+			return {
+				-width2 + center.x,
+				-height2 + center.y,
+				width2 + center.x,
+				height2 + center.y
+			};
+		} else {
+			double toolRadius = tool.diameter / 2.;
+			return {
+				center.x - toolRadius,
+				center.y - toolRadius,
+				center.x + toolRadius + size.cx,
+				center.y + toolRadius + size.cy
+			};
+		}
 	}
 	
 	Size getCount() {return count;}
@@ -80,6 +94,15 @@ public:
 		calculate();
 	}
 	
+	bool isOnCenter() {
+		return onCenter;
+	}
+	
+	void SetOnCenter(bool c) {
+		onCenter = c;
+		calculate();
+	}
+	
 	virtual String ToString() {
 		return String(t_("Drilling")) + "(" + DblStr(tool.diameter) + " x " + DblStr(depth) + ") " + t_("Array:") + " " + count.ToString();
 	}
@@ -92,9 +115,9 @@ public:
 			double shiftX = viewRect.left * scale - (imgSz.cx - viewSize.cx * scale) / 2.;
 			double shiftY = viewRect.top * scale - (imgSz.cy - viewSize.cy * scale) / 2.;
 			
-			int xLeft = (int)((center.x - size.cx / 2.) * scale - shiftX);
+			int xLeft = (int)((center.x - (onCenter ? size.cx / 2. : 0.)) * scale - shiftX);
 			int xRight = xLeft + (int)(size.cx * scale);
-			int yBottom =  imgSz.cy - (int)((center.y - size.cy / 2.) * scale - shiftY);
+			int yBottom =  imgSz.cy - (int)((center.y - (onCenter ? size.cy / 2. : 0.)) * scale - shiftY);
 			int yTop = yBottom - (int)(size.cy * scale);
 			if (count.cx > 1) {
 				if (count.cy > 1) {
@@ -189,6 +212,12 @@ public:
 				Action();
 			}
 		};
+		oOnCenter.WhenAction = [=] {
+			if (operation) {
+				operation->SetOnCenter(~oOnCenter);
+				Action();
+			}
+		};
 	}
 	OperationDrillArray* setOperation(Operation *operation) {
 		if (operation == NULL) {
@@ -201,6 +230,7 @@ public:
 			eHeight.Clear();
 			eCountX.Clear();
 			eCountY.Clear();
+			oOnCenter <<= false;
 			return NULL;
 		}
 		OperationDrillArray *drArray = dynamic_cast<OperationDrillArray*>(operation);
@@ -217,6 +247,7 @@ public:
 		eHeight <<= drArray->getSize().cy;
 		eCountX <<= drArray->getCount().cx;
 		eCountY <<= drArray->getCount().cy;
+		oOnCenter <<= drArray->isOnCenter();
 		
 		return isCreateNew ? drArray : NULL;
 	}
