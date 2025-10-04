@@ -3,6 +3,11 @@
 
 #include "OperationDrill.hpp"
 
+enum ODR_RD {
+	ODR_Radius = 1,
+	ODR_Diameter = 2
+};
+
 class OperationDrillRoundless : public OperationDrill {
 private:
 	double radius = 15.;
@@ -37,27 +42,39 @@ public:
 	
 	OperationDrillRoundless(Pointf center, double radius, int count, double startAngle, double sector) {
 		setRoundless(center, radius, count, startAngle, sector);
-	};
+	}
 	
-	double getRadius() {return radius;}
+	double getRadius() {
+		return radius;
+	}
+	
 	void setRadius(const double r) {
 		radius = r;
 		calculate();
 	}
 	
-	int getCount() {return count;}
+	int getCount() {
+		return count;
+	}
+	
 	void setCount(const int c) {
 		count = c;
 		calculate();
 	}
 	
-	double getStartAngle() {return startAngle;}
+	double getStartAngle() {
+		return startAngle;
+	}
+	
 	void setStartAngle(const double a) {
 		startAngle = a;
 		calculate();
 	}
 	
-	double getSector() {return sector;}
+	double getSector() {
+		return sector;
+	}
+	
 	void setSector(const double s) {
 		sector = s;
 		calculate();
@@ -180,11 +197,16 @@ public:
 class OperationRoundlessTab : public WithOperationRoudless<ParentCtrl> {
 private:
 	OperationDrillRoundless *operation = NULL;
+	
 public:
 	Event<> WhenPushToolEditor;
 	OperationRoundlessTab() {
 		CtrlLayout(*this);
 		updateToolList();
+		dlRadius.Add({
+			{ODR_Radius , t_("Radius")},
+			{ODR_Diameter , t_("Diameter")}
+		});
 		bToolEditor.WhenPush = [=] {
 			WhenPushToolEditor();
 		};
@@ -219,9 +241,17 @@ public:
 		eRadius.WhenAction = [=] {
 			double r = eRadius;
 			if (operation && r > 0.) {
-				operation->setRadius(r);
+				operation->setRadius(r / (int)dlRadius.GetData());
 				Action();
 			}
+		};
+		dlRadius.WhenAction = [=] {
+			if (dlRadius.GetData() == ODR_Radius) {
+				eRadius <<= (double)~eRadius / 2.;
+			} else {
+				eRadius <<= (double)~eRadius * 2.;
+			}
+			eRadius.WhenAction();
 		};
 		eCount.WhenAction = [=] {
 			int c = eCount;
@@ -243,7 +273,9 @@ public:
 			}
 		};
 	}
+	
 	OperationDrillRoundless* setOperation(Operation *operation) {
+		dlRadius <<= ODR_Radius;
 		if (operation == NULL) {
 			this->operation = NULL;
 			dlTool = -1;
@@ -273,6 +305,7 @@ public:
 		
 		return isCreateNew ? drRoundless : NULL;
 	}
+	
 	void updateToolList() {
 		dlTool.Clear();
 		for (Tool &t : Settings::tools) {

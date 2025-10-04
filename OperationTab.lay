@@ -1,6 +1,6 @@
 LAYOUT(OperationRoudless, 268, 200)
 	ITEM(Upp::Label, dv___0, SetLabel(t_("Count:")).SetAlign(Upp::ALIGN_RIGHT).LeftPosZ(8, 116).TopPosZ(128, 19))
-	ITEM(Upp::Label, dv___1, SetLabel(t_("Radius:")).SetAlign(Upp::ALIGN_RIGHT).LeftPosZ(8, 116).TopPosZ(104, 19))
+	ITEM(Upp::DropList, dlRadius, LeftPosZ(8, 116).TopPosZ(104, 19))
 	ITEM(Upp::Label, dv___2, SetLabel(t_("Center shift X:")).SetAlign(Upp::ALIGN_RIGHT).LeftPosZ(8, 116).TopPosZ(56, 19))
 	ITEM(Upp::Label, dv___3, SetLabel(t_("Center shift Y:")).SetAlign(Upp::ALIGN_RIGHT).LeftPosZ(8, 116).TopPosZ(80, 19))
 	ITEM(Upp::EditIntSpin, eCount, Min(1).LeftPosZ(128, 132).TopPosZ(128, 19))
