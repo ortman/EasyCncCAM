@@ -136,9 +136,9 @@ public:
 	void showAllView() {
 		if (operations != NULL && operations->GetCount() > 0) {
 			int cnt = operations->GetCount();
-			Operation *o = (*operations)[0];
-			viewRect = o->getRect();
-			for (int i=1; i<cnt; ++i) {
+			Operation *o;
+			viewRect = {0., 0., 0., 0.};
+			for (int i = 0; i < cnt; ++i) {
 				o = (*operations)[i];
 				if (o != NULL) {
 					viewRect.Union(o->getRect());
