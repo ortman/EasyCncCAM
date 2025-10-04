@@ -115,7 +115,7 @@ public:
 		measurersLineWidth = (int)(1. * Settings::subsampling);
 		measurersArrowSize = 15. * Settings::subsampling;
 		measurersArrowAngle = M_PI / 10.;
-		viewerAutoRescale = false;
+		viewerAutoRescale = true;
 		fileExt = "TAP";
 	}
 	
