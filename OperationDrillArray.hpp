@@ -13,18 +13,18 @@ private:
 		drills.clear();
 		double sx, sy, startX, startY;
 		if (count.cx > 1) {
-			sx = size.cx / (count.cx-1);
-			startX = onCenter ? center.x - size.cx / 2 : 0;
+			sx = size.cx / (count.cx - 1);
+			startX = center.x - (onCenter ? size.cx / 2. : 0.);
 		} else {
 			sx = 0;
-			startX = onCenter ? center.x : 0;
+			startX = center.x;
 		}
 		if (count.cy > 1) {
-			sy = size.cy / (count.cy-1);
-			startY = onCenter ? center.y - size.cy / 2 : 0;
+			sy = size.cy / (count.cy - 1);
+			startY = center.y - (onCenter ? size.cy / 2. : 0.);
 		} else {
-			sy = 0;
-			startY = onCenter ? center.y : 0;
+			sy = 0.;
+			startY = center.y;
 		}
 		for (int x = 0; x < count.cx; ++x) {
 			for (int y = 0; y < count.cy; ++y) {
