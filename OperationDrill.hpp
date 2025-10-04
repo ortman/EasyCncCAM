@@ -67,28 +67,28 @@ public:
 		return String(t_("Drill(")) + DblStr(tool.diameter) + "x" + DblStr(depth) + ")";
 	}
 	
-	virtual const String gcode(GCode *g) {
+	virtual const String gcode(GCode &g) {
 		String s;
 		calculate();
 		//s << g->CoordinateSystem(1);
-		s << g->SetTool(tool);
-		s << g->RunSpindele(tool.speed);
-		s	<< g->CoolantOn();
+		s << g.SetTool(tool);
+		s << g.RunSpindele(tool.speed);
+		s	<< g.CoolantOn();
 		double d = tool.diameter;
 		double len = min(tool.length, depth);
-		s << g->MoveZ0(-safeToolH);
+		s << g.MoveZ0(-safeToolH);
 		for (Pointf p : drills) {
-				s << g->Move0(p.x, p.y);
-				s << g->MoveZ0(0.5);
+				s << g.Move0(p.x, p.y);
+				s << g.MoveZ0(0.5);
 				for (double l = d; l < len; l += d) {
-					s << g->MoveZ1(-l, tool.feedRateZ);
-					s << g->MoveZ0(1.);
-					s << g->MoveZ0(-l + 0.5);
+					s << g.MoveZ1(-l, tool.feedRateZ);
+					s << g.MoveZ0(1.);
+					s << g.MoveZ0(-l + 0.5);
 				}
-				s << g->MoveZ1(-len, tool.feedRateZ);
-				s << g->MoveZ0(-safeToolH);
+				s << g.MoveZ1(-len, tool.feedRateZ);
+				s << g.MoveZ0(-safeToolH);
 		}
-		s	<< g->CoolantOff();
+		s	<< g.CoolantOff();
 		return s;
 	}
 };

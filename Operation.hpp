@@ -130,7 +130,7 @@ public:
 	}
 	double getDepth() {return depth;}
 	void setDepth(double d) {depth = d;}
-	virtual const String gcode(GCode *g) {
+	virtual const String gcode(GCode& g) {
 		return "";
 	}
 };

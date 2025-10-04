@@ -8,32 +8,33 @@ using namespace Upp;
 
 class GCodeGenerator {
 public:
-	static String Generate(const Vector<Operation*> &operations, GCode* g) {
+	template <class T>
+	static String Generate(const Vector<Operation*> &operations) {
 		String s;
-		if (g == NULL) return s;
-		s << g->Start();
-		s << g->Label(1, "Program name");
-		s << g->CoordinateSystem(1);
-		s << g->AbsolutePos();
-		s << g->SetFlat(GCode::XY);
-		s << g->ToolCompensationOff();
-		s << g->CiclesOff();
+		T g;
+		s << g.Start();
+		s << g.Label(1, "Program name");
+		s << g.CoordinateSystem(1);
+		s << g.AbsolutePos();
+		s << g.SetFlat(GCode::XY);
+		s << g.ToolCompensationOff();
+		s << g.CiclesOff();
 		//s << G00; // ???
-		s << g->ToolLenCorrectionOff();
-		s << g->Metric();
+		s << g.ToolLenCorrectionOff();
+		s << g.Metric();
 			
 		for (Operation *op : operations) {
 			if (op->getTool().isValid()) {
-				s << g->Comment(op->ToString());
+				s << g.Comment(op->ToString());
 				s << op->gcode(g);
 			} else {
 				ErrorOK(Format(t_("Tool (%s) is not valid parameters!"), op->getTool().ToString()));
 			}
 		}
 
-		s << g->CoolantOff();
-		s << g->SpindeleOff();
-		s << g->End();
+		s << g.CoolantOff();
+		s << g.SpindeleOff();
+		s << g.End();
 
 		return s;
 	}

@@ -182,18 +182,22 @@ EasyCncCAM::EasyCncCAM() {
 	bGenerate.WhenPush = [=] {
 		String dir = GCodeGenerator::GetSaveDirectory();
 		if (!dir.IsEmpty()) sel.ActiveDir(dir);
-		sel.Set(GCodeGenerator::GenerateFileName(operations));
-		if (sel.ExecuteSaveAs() && !sel.Get().IsEmpty()) {
-			FileOut f;
-			if (f.Open(~sel)) {
-				GCode* g = new GCodeMach3();
-				String out = GCodeGenerator::Generate(operations, g);
-				//LOG(out);
-				delete g;
-				f.Put(out);
-				f.Close();
-			} else {
-				ErrorOK("Can not save file!");
+		
+		VectorMap<Tool, Vector<Operation*>> grOperations;
+		for (Operation* o : operations) {
+			grOperations.GetAdd(o->getTool()).Add(o);
+		}
+		for (const Vector<Operation*>& toolOperations : grOperations.GetValues()) {
+			sel.Set(GCodeGenerator::GenerateFileName(toolOperations));
+			if (sel.ExecuteSaveAs() && !sel.Get().IsEmpty()) {
+				FileOut f;
+				if (f.Open(~sel)) {
+					String out = GCodeGenerator::Generate<GCodeMach3>(toolOperations);
+					f.Put(out);
+					f.Close();
+				} else {
+					ErrorOK("Can not save file!");
+				}
 			}
 		}
 	};
