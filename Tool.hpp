@@ -9,7 +9,8 @@ struct Tool : ValueType<Tool, 10013, Comparable<Tool, Moveable<Tool>>> {
 	enum Type {
 		Other = 0,
 		Drill = 1,
-		Mill
+		Mill,
+		Thread
 	};
 	Tool::Type type;
 	double diameter;
@@ -60,20 +61,20 @@ struct Tool : ValueType<Tool, 10013, Comparable<Tool, Moveable<Tool>>> {
 	
 	static String typeToString(Type type, bool localize = false) {
 		switch (type) {
-			case Type::Mill: {
-				return localize ? t_("Mill") : "Mill";
-			}
-			default: {
-				return localize ? t_("Drill") : "Drill";
-			}
+			case Mill: return localize ? t_("Mill") : "Mill";
+			case Thread: return localize ? t_("Thread") : "Thread";
+			case Drill: return localize ? t_("Drill") : "Drill";
+			default: return localize ? t_("Any") : "Any";
 		}
 	}
 	
 	static Type typeFromString(String type) {
 		if (type == "Mill") return Mill;
 		if (type == "Drill") return Drill;
+		if (type == "Thread") return Thread;
 		if (type == t_("Mill")) return Mill;
 		if (type == t_("Drill")) return Drill;
+		if (type == t_("Thread")) return Thread;
 		return Other;
 	}
 	
@@ -120,7 +121,7 @@ struct Tool : ValueType<Tool, 10013, Comparable<Tool, Moveable<Tool>>> {
 	}
 	
 	bool isValid() {
-		if (type != Drill && type != Mill) return false;
+		if (type != Drill && type != Mill && type != Thread) return false;
 		if (diameter <= 0.) return false;
 		if (length <= 0.1) return false;
 		if (speed < 1) return false;
