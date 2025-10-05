@@ -21,10 +21,13 @@ private:
 			Size toolTyleStringSize = GetTextSize(toolTypeString, StdFont());
 			Font paramsFont = StdFont();
 			paramsFont.Height((int)(paramsFont.GetHeight() * 1.6));
-			w.DrawText(r.left + (r.Width() - toolTyleStringSize.cx) / 2, r.bottom - toolTyleStringSize.cy - paramsFont.GetHeight() - 6, toolTypeString, StdFont(), ink);
+			int txtY = r.top + 30;
+			w.DrawText(r.left + (r.Width() - toolTyleStringSize.cx) / 2, txtY, toolTypeString, StdFont(), ink);
+			txtY += toolTyleStringSize.cy;
 			String toolParams = DblStr(tool.diameter) + " x " + DblStr(tool.length);
 			Size toolParamsSize = GetTextSize(toolParams, paramsFont);
-			w.DrawText(r.left + (r.Width() - toolParamsSize.cx) / 2, r.bottom - toolParamsSize.cy - 3, toolParams, paramsFont, ink);
+			w.DrawText(r.left + (r.Width() - toolParamsSize.cx) / 2, txtY, toolParams, paramsFont, ink);
+			//txtY += paramsFont.GetHeight();
 		}
 		
 		virtual Size GetStdSize(const Value& q) const {
