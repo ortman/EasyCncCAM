@@ -10,8 +10,13 @@ private:
 	struct ToolListDisplay : public Display {
 		virtual void Paint(Draw& w, const Rect& r, const Value& q, Color ink, Color paper, dword style) const {
 			PaintBackground(w, r, q, ink, paper, style);
-			w.DrawImage({r.left + 20, r.top, r.right - 20, r.bottom - 40}, ResourceImage::Mill2());
 			Tool tool = q;
+			switch (tool.type) {
+				case Tool::Drill:  w.DrawImage(r, ResourceImage::Drill()); break;
+				case Tool::Mill:   w.DrawImage(r, ResourceImage::Mill()); break;
+				case Tool::Thread: w.DrawImage(r, ResourceImage::Thread()); break;
+				default: break;
+			}
 			String toolTypeString = Tool::typeToString(tool.type, true);
 			Size toolTyleStringSize = GetTextSize(toolTypeString, StdFont());
 			Font paramsFont = StdFont();
