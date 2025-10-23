@@ -4,11 +4,19 @@
 #include "OperationDrill.hpp"
 
 class OperationDrillArray : public OperationDrill {
+public:
+	typedef enum {
+		LenAll = 1,
+		LenBetween
+	} LenType;
+
+private:
 	Sizef size;
 	Size count;
 	bool onCenter;
+	LenType widthType;
+	LenType heightType;
 	
-private:
 	void calculate() {
 		drills.clear();
 		double sx, sy, startX, startY;
@@ -38,6 +46,8 @@ public:
 		size = {30., 20.};
 		count = {3, 2};
 		onCenter = false;
+		widthType = LenAll;
+		heightType = LenAll;
 		calculate();
 	}
 	
@@ -45,11 +55,15 @@ public:
 		size = {30., 20.};
 		count = {3, 2};
 		onCenter = false;
+		widthType = LenAll;
+		heightType = LenAll;
 		calculate();
 	}
 	
 	OperationDrillArray(Pointf center, Sizef size, Size count) {
 		onCenter = false;
+		widthType = LenAll;
+		heightType = LenAll;
 		setArray(center, size, count);
 	}
 	
@@ -103,6 +117,22 @@ public:
 		calculate();
 	}
 	
+	LenType getWidthType() {
+		return widthType;
+	}
+	
+	void setWidthType(LenType t) {
+		widthType = t;
+	}
+	
+	LenType getHeightType() {
+		return heightType;
+	}
+	
+	void setHeightType(LenType t) {
+		heightType = t;
+	}
+	
 	virtual String ToString() {
 		return String(t_("Drilling")) + "(" + DblStr(tool.diameter) + " x " + DblStr(depth) + ") " + t_("Array:") + " " + count.ToString();
 	}
@@ -144,6 +174,7 @@ public:
 class OperationArrayTab : public WithOperationArray<Ctrl> {
 private:
 	OperationDrillArray *operation = NULL;
+	
 public:
 	Event<> WhenPushToolEditor;
 	OperationArrayTab() {
@@ -180,19 +211,69 @@ public:
 				Action();
 			}
 		};
+		dlWidthType.Add({
+			{OperationDrillArray::LenAll, t_("Total width")},
+			{OperationDrillArray::LenBetween, t_("Width between drills")}
+		});
+		dlWidthType.WhenAction = [=] {
+			int t = dlWidthType.GetData();
+			if (operation && t > 0) {
+				OperationDrillArray::LenType type = (OperationDrillArray::LenType)t;
+				OperationDrillArray::LenType currType = operation->getWidthType();
+				if (type != currType) {
+					operation->setWidthType(type);
+					Sizef size = operation->getSize();
+					if (type == OperationDrillArray::LenAll) {
+						operation->setSize({size.cx / (operation->getCount().cx - 1), size.cy});
+					} else {
+						operation->setSize({size.cx * (operation->getCount().cx - 1), size.cy});
+					}
+				}
+			}
+			Action();
+		};
 		eWidth.WhenAction = [=] {
 			double w = eWidth;
 			if (operation && w > 0.) {
 				Sizef size = operation->getSize();
-				operation->setSize({w, size.cy});
+				if (operation->getWidthType() == OperationDrillArray::LenAll) {
+					operation->setSize({w, size.cy});
+				} else {
+					operation->setSize({w * (operation->getCount().cx - 1), size.cy});
+				}
 				Action();
 			}
+		};
+		dlHeightType.Add({
+			{OperationDrillArray::LenAll, t_("Total height")},
+			{OperationDrillArray::LenBetween, t_("Height between drills")}
+		});
+		dlHeightType.WhenAction = [=] {
+			int t = dlHeightType.GetData();
+			if (operation && t > 0) {
+				OperationDrillArray::LenType type = (OperationDrillArray::LenType)t;
+				OperationDrillArray::LenType currType = operation->getHeightType();
+				if (type != currType) {
+					operation->setHeightType(type);
+					Sizef size = operation->getSize();
+					if (type == OperationDrillArray::LenAll) {
+						operation->setSize({size.cx, size.cy / (operation->getCount().cy - 1)});
+					} else {
+						operation->setSize({size.cx, size.cy * (operation->getCount().cy - 1)});
+					}
+				}
+			}
+			Action();
 		};
 		eHeight.WhenAction = [=] {
 			double h = eHeight;
 			if (operation && h > 0.) {
 				Sizef size = operation->getSize();
-				operation->setSize({size.cx, h});
+				if (operation->getWidthType() == OperationDrillArray::LenAll) {
+					operation->setSize({size.cx, h});
+				} else {
+					operation->setSize({size.cx, h * (operation->getCount().cy - 1)});
+				}
 				Action();
 			}
 		};
@@ -201,6 +282,10 @@ public:
 			if (operation && c > 0) {
 				Size count = operation->getCount();
 				operation->setCount({c, count.cy});
+				if (operation->getWidthType() == OperationDrillArray::LenBetween && count.cx > 1 && c > 1) {
+					Sizef s = operation->getSize();
+					operation->setSize({s.cx / (count.cx - 1) * (c - 1), s.cy});
+				}
 				Action();
 			}
 		};
@@ -209,6 +294,10 @@ public:
 			if (operation && c > 0) {
 				Size count = operation->getCount();
 				operation->setCount({count.cx, c});
+				if (operation->getHeightType() == OperationDrillArray::LenBetween && count.cy > 1 && c > 1) {
+					Sizef s = operation->getSize();
+					operation->setSize({s.cx, s.cy / (count.cy - 1) * (c - 1)});
+				}
 				Action();
 			}
 		};
@@ -231,6 +320,8 @@ public:
 			eCountX.Clear();
 			eCountY.Clear();
 			oOnCenter <<= false;
+			dlWidthType <<= OperationDrillArray::LenAll;
+			dlHeightType <<= OperationDrillArray::LenAll;
 			return NULL;
 		}
 		OperationDrillArray *drArray = dynamic_cast<OperationDrillArray*>(operation);
@@ -248,6 +339,8 @@ public:
 		eCountX <<= drArray->getCount().cx;
 		eCountY <<= drArray->getCount().cy;
 		oOnCenter <<= drArray->isOnCenter();
+		dlWidthType <<= drArray->getWidthType();
+		dlHeightType <<= drArray->getHeightType();
 		
 		return isCreateNew ? drArray : NULL;
 	}
