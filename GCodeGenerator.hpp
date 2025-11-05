@@ -55,9 +55,11 @@ public:
 			}
 		}
 		if (count) {
-			return Format("D%0.4g`x%0.5g(%i).", tool.diameter, depth, count) + Settings::fileExt;
+			return Format(String(tool.type == Tool::Thread ? "T" : "D") + "%0.4g`x%0.5g(%i).",
+					tool.diameter, depth, count) + Settings::fileExt;
 		} else {
-			return Format("D%0.4g`x%0.5g.", tool.diameter, depth) + Settings::fileExt;
+			return Format(String(tool.type == Tool::Thread ? "T" : "D") + "%0.4g`x%0.5g.",
+					tool.diameter, depth) + Settings::fileExt;
 		}
 	}
 

@@ -10,6 +10,8 @@ private:
 		cViewerBG <<= Settings::viewerBG;
 		cDrillColor <<= Settings::drillColor;
 		eDrillLineWidth <<= round(Settings::drillLineWidth / Settings::subsampling);
+		cThreadColor <<= Settings::threadColor;
+		eThreadLineWidth <<= round(Settings::threadLineWidth / Settings::subsampling);
 		cDrillCenterColor <<= Settings::drillCenterColor;
 		cMeasurersColor <<= Settings::measurersColor;
 		eMeasurersFont <<= round(Settings::measurersFont.GetHeight() / Settings::subsampling);
@@ -58,6 +60,14 @@ public:
 		};
 		eDrillLineWidth.WhenAction = [=] {
 			Settings::drillLineWidth = (int)((int)~eDrillLineWidth * Settings::subsampling);
+			WhenAction();
+		};
+		cThreadColor.WhenAction = [=] {
+			Settings::threadColor = ~cThreadColor;
+			WhenAction();
+		};
+		eThreadLineWidth.WhenAction = [=] {
+			Settings::threadLineWidth = (int)((int)~eThreadLineWidth * Settings::subsampling);
 			WhenAction();
 		};
 		cDrillCenterColor.WhenAction = [=] {

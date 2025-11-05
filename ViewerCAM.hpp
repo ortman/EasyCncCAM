@@ -30,8 +30,8 @@ private:
 		double scale = min(iDrawSize.cx / viewSize.cx, iDrawSize.cy / viewSize.cy);
 		int shiftX = (int)(-viewRect.left * scale + (iDrawSize.cx - viewSize.cx * scale) / 2.);
 		int shiftY = (int)(iDrawSize.cy + viewRect.top * scale - (iDrawSize.cy - viewSize.cy * scale) / 2.);
-		draw.DrawLine(shiftX, shiftY, (int)(shiftX + coordSize.cx * Settings::subsampling), shiftY, Settings::measurersLineWidth, Red);
-		draw.DrawLine(shiftX, (int)(shiftY - coordSize.cy * Settings::subsampling), shiftX, shiftY, Settings::measurersLineWidth, Green);
+		draw.DrawLine(shiftX, shiftY, (int)(shiftX + coordSize.cx * Settings::subsampling), shiftY, Settings::measurersLineWidth * 3, LtRed);
+		draw.DrawLine(shiftX, (int)(shiftY - coordSize.cy * Settings::subsampling), shiftX, shiftY, Settings::measurersLineWidth * 3, LtGreen);
 	}
 	
 public:

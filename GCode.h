@@ -14,10 +14,10 @@ public:
 	};
 	enum CMD {
 		NONE = 0,
-		G00,
-		G01,
 		G0,
 		G1,
+		G2,
+		G3,
 		G17,
 		G18,
 		G19,
@@ -56,6 +56,8 @@ public:
 	virtual inline const String MoveZ1(double z = NAN, double f = NAN) {
 		return Move1(NAN, NAN, z, f);
 	}
+	virtual inline const String Move2(double x = NAN, double y = NAN, double i = NAN, double j = NAN, double z = NAN) { return ""; }
+	virtual inline const String Move3(double x = NAN, double y = NAN, double i = NAN, double j = NAN, double z = NAN) { return ""; }
 	
 	virtual inline const String RunSpindele(int speed, bool clockwise = true) { return ""; }
 	virtual inline const String SetFlat(GCode::Flat f) { return ""; }

@@ -42,7 +42,7 @@ public:
 	
 	inline const String Move0(double x = NAN, double y = NAN, double z = NAN, double f = NAN) {
 		String sb;
-		if (lastCMD != G00) sb << " G00";
+		if (lastCMD != G0) sb << " G00";
 		if (!IsNaN(x) && lastX != x) {
 			sb << " X" << DblStrMach3(x);
 			lastX = x;
@@ -60,13 +60,13 @@ public:
 			lastF = f;
 		}
 		if (sb.GetLength() == 0) return "";
-		lastCMD = G00;
+		lastCMD = G0;
 		return sb.Mid(1) << "\n";
 	}
 	
 	inline const String Move1(double x = NAN, double y = NAN, double z = NAN, double f = NAN) {
 		String sb;
-		if (lastCMD != G01) sb << " G01";
+		if (lastCMD != G1) sb << " G01";
 		if (!IsNaN(x) && lastX != x) {
 			sb << " X" << DblStrMach3(x);
 			lastX = x;
@@ -84,7 +84,59 @@ public:
 			lastF = f;
 		}
 		if (sb.GetLength() == 0) return "";
-		lastCMD = G01;
+		lastCMD = G1;
+		return sb.Mid(1) << "\n";
+	}
+	
+	inline const String Move2(double x = NAN, double y = NAN, double i = NAN, double j = NAN, double z = NAN) {
+		String sb;
+		if (lastCMD != G2) sb << " G02";
+		if (!IsNaN(x) && lastX != x) {
+			sb << " X" << DblStrMach3(x);
+			lastX = x;
+		}
+		if (!IsNaN(y) && lastY != y) {
+			sb << " Y" << DblStrMach3(y);
+			lastY = y;
+		}
+		if (!IsNaN(i)) {
+			sb << " I" << DblStrMach3(i);
+		}
+		if (!IsNaN(j)) {
+			sb << " J" << DblStrMach3(j);
+		}
+		if (!IsNaN(z) && lastZ != z) {
+			sb << " Z" << DblStrMach3(z);
+			lastZ = z;
+		}
+		if (sb.GetLength() == 0) return "";
+		lastCMD = G2;
+		return sb.Mid(1) << "\n";
+	}
+	
+	inline const String Move3(double x = NAN, double y = NAN, double i = NAN, double j = NAN, double z = NAN) {
+		String sb;
+		if (lastCMD != G3) sb << " G03";
+		if (!IsNaN(x) && lastX != x) {
+			sb << " X" << DblStrMach3(x);
+			lastX = x;
+		}
+		if (!IsNaN(y) && lastY != y) {
+			sb << " Y" << DblStrMach3(y);
+			lastY = y;
+		}
+		if (!IsNaN(i)) {
+			sb << " I" << DblStrMach3(i);
+		}
+		if (!IsNaN(j)) {
+			sb << " J" << DblStrMach3(j);
+		}
+		if (!IsNaN(z) && lastZ != z) {
+			sb << " Z" << DblStrMach3(z);
+			lastZ = z;
+		}
+		if (sb.GetLength() == 0) return "";
+		lastCMD = G3;
 		return sb.Mid(1) << "\n";
 	}
 	

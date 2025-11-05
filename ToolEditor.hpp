@@ -56,7 +56,7 @@ public:
 		dlType.Add(Tool::Mill, Tool::typeToString(Tool::Mill, true));
 		dlType.Add(Tool::Thread, Tool::typeToString(Tool::Thread, true));
 		
-		dlSearchType.Add((int)Tool::Other, Tool::typeToString(Tool::Other, true));
+		dlSearchType.Add((int)-1, t_("Any"));
 		dlSearchType.Add((int)Tool::Drill, Tool::typeToString(Tool::Drill, true));
 		dlSearchType.Add((int)Tool::Mill, Tool::typeToString(Tool::Mill, true));
 		dlSearchType.Add((int)Tool::Thread, Tool::typeToString(Tool::Thread, true));
@@ -71,16 +71,22 @@ public:
 				eDiameter <<= selectedTool.diameter;
 				eLength <<= selectedTool.length;
 				eSpeed <<= selectedTool.speed;
+				eFeedRateZ <<= selectedTool.feedRateZ;
 				eFeedRateXY <<= selectedTool.feedRateXY;
 				eFeedRateXY.Enable(dlType != Tool::Drill);
-				eFeedRateZ <<= selectedTool.feedRateZ;
+				eThreadToolDiameter <<= selectedTool.threadToolDiameter;
+				eThreadToolDiameter.Enable(dlType == Tool::Thread);
+				eThreadStep <<= selectedTool.threadStep;
+				eThreadStep.Enable(dlType == Tool::Thread);
 			} else {
 				dlType = -1;
 				eDiameter.Clear();
 				eLength.Clear();
 				eSpeed.Clear();
-				eFeedRateXY.Clear();
 				eFeedRateZ.Clear();
+				eFeedRateXY.Clear();
+				eThreadToolDiameter.Clear();
+				eThreadStep.Clear();
 			}
 		};
 		dlType.WhenAction = [=] {
@@ -88,6 +94,8 @@ public:
 			Tool::Type t = (Tool::Type)(int)dlType.GetData();
 			if (t > 0 && i >= 0) {
 				eFeedRateXY.Enable(t != Tool::Drill);
+				eThreadToolDiameter.Enable(t == Tool::Thread);
+				eThreadStep.Enable(t == Tool::Thread);
 				selectedTool.type = t;
 				clTools.Set(i , selectedTool);
 				clTools.Refresh();
@@ -129,6 +137,22 @@ public:
 			int i = clTools.GetCursor();
 			if (i >= 0) {
 				selectedTool.feedRateZ = eFeedRateZ;
+				clTools.Set(i , selectedTool);
+				clTools.Refresh();
+			}
+		};
+		eThreadToolDiameter.WhenAction = [=] {
+			int i = clTools.GetCursor();
+			if (i >= 0) {
+				selectedTool.threadToolDiameter = eThreadToolDiameter;
+				clTools.Set(i , selectedTool);
+				clTools.Refresh();
+			}
+		};
+		eThreadStep.WhenAction = [=] {
+			int i = clTools.GetCursor();
+			if (i >= 0) {
+				selectedTool.threadStep = eThreadStep;
 				clTools.Set(i , selectedTool);
 				clTools.Refresh();
 			}

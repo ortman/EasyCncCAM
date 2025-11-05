@@ -104,7 +104,8 @@ public:
 	}
 	
 	virtual String ToString() {
-		return String(t_("Drilling")) + "(" + DblStr(tool.diameter) + " x " + DblStr(depth) + ") " + t_("Array:") + " " + count.ToString();
+		return String(tool.type == Tool::Thread ? t_("Threading") : t_("Drilling")) +
+				" (" + DblStr(tool.diameter) + " x " + DblStr(depth) + ") " + t_("Array:") + " " + count.ToString();
 	}
 	
 	virtual void Draw(ImageDraw& draw, Size& imgSz, Rectf& viewRect, bool isMeasurers = false, bool isDrawDrillCenter = false) {
@@ -130,11 +131,13 @@ public:
 				} else {
 					yBottom =  imgSz.cy - (int)(center.y * scale - shiftY);
 				}
-				DrawMeasureLine(draw, xLeft, yBottom, xRight, yBottom, DblStr(size.cx), tool.diameter / 2. * scale + 10. * Settings::subsampling);
+				if (tool.type != Tool::Thread) {
+					DrawMeasureLine(draw, xLeft, yBottom, xRight, yBottom, DblStr(size.cx), tool.diameter / 2. * scale + 10. * Settings::subsampling);
+				}
 			} else {
 				xRight = (int)(center.x * scale - shiftX);
 			}
-			if (count.cy > 1) {
+			if (count.cy > 1 && tool.type != Tool::Thread) {
 				DrawMeasureLine(draw, xRight, yBottom, xRight, yTop, DblStr(size.cy), tool.diameter / 2. * scale + 10. * Settings::subsampling);
 			}
 		}

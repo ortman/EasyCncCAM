@@ -77,7 +77,7 @@ EasyCncCAM::EasyCncCAM() {
 	
 	bRemoveOperation.Disable();
 	bAddOperation.WhenPush = [=] {
-		OperationDrill *o = new OperationDrillRoundless();
+		OperationDrill *o = new OperationDrillArray();
 		if (currentOperation != NULL) {
 			o->setTool(currentOperation->getTool());
 			OperationDrill* od = dynamic_cast<OperationDrill*>(currentOperation);
@@ -127,7 +127,7 @@ EasyCncCAM::EasyCncCAM() {
 	
 	tOperationSettings.Add(operationArrayTab, t_("Array"));
 	tOperationSettings.Add(operationRoundlessTab, t_("Roundless"));
-	tOperationSettings.Add(operationMillingTab, t_("Milling")).Disable();
+	//tOperationSettings.Add(operationMillingTab, t_("Milling")).Disable();
 	
 	operationArrayTab.WhenAction =
 	operationRoundlessTab.WhenAction =
