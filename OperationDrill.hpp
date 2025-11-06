@@ -1,5 +1,5 @@
-#ifndef _OPERATION_DRILL_H_
-#define _OPERATION_DRILL_H_
+#ifndef _OPERATION_DRILL_HPP_
+#define _OPERATION_DRILL_HPP_
 
 #include "Operation.hpp"
 

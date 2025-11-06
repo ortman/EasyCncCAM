@@ -1,5 +1,5 @@
-#ifndef _OPERATION_H_
-#define _OPERATION_H_
+#ifndef _OPERATION_HPP_
+#define _OPERATION_HPP_
 
 #include <Core/Core.h>
 

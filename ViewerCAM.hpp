@@ -1,5 +1,5 @@
-#ifndef _VIEWER_CAM_H_
-#define _VIEWER_CAM_H_
+#ifndef _VIEWER_CAM_HPP_
+#define _VIEWER_CAM_HPP_
 
 #include <Core/Core.h>
 #include "OperationDrillArray.hpp"

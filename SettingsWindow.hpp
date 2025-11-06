@@ -1,5 +1,5 @@
-#ifndef _SETTINGS_WINDOW_H_
-#define _SETTINGS_WINDOW_H_
+#ifndef _SETTINGS_WINDOW_HPP_
+#define _SETTINGS_WINDOW_HPP_
 
 #include "ToolEditor.hpp"
 

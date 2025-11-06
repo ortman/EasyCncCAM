@@ -6,6 +6,7 @@ uses
 file
 	Tool.hpp,
 	Resource.h,
+	OperationList.hpp,
 	EasyCncCAM.h,
 	OperationTab.lay,
 	OperationDrillRoundless.hpp,

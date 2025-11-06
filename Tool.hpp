@@ -1,5 +1,5 @@
-#ifndef _TOOL_H_
-#define _TOOL_H_
+#ifndef _TOOL_HPP_
+#define _TOOL_HPP_
 
 #include <CtrlLib/CtrlLib.h>
 
@@ -22,25 +22,11 @@ struct Tool : ValueType<Tool, 10013, Comparable<Tool, Moveable<Tool>>> {
 	Tool(Tool::Type t, double d, double l, int s, int fXY, int fZ) :
 			type(t), diameter(d), length(l), speed(s), feedRateXY(fXY), feedRateZ(fZ) {}
 	Tool(const Value& v) {
-		type = typeFromString(v["type"]);
-		diameter = v["diameter"];
-		length = v["length"];
-		speed = v["speed"];
-		feedRateXY =  v["feedrateXY"];
-		if (type == Drill) feedRateXY = 0;
-		feedRateZ = v["feedrateZ"];
+		*this = v.Get<Tool>();
 	}
 
 	operator Value() const {
-		//return RichValue<Tool>(*this);
-		Value v;
-		v("type") = typeToString(type);
-		v("diameter") = diameter;
-		v("length") = length;
-		v("speed") = speed;
-		v("feedrateXY") = feedRateXY;
-		v("feedrateZ") = feedRateZ;
-		return v;
+		return RichValue<Tool>(*this);
 	}
 	
 	int Compare(const Tool& o) const { return CombineCompare((int)type, (int)o.type)(diameter, o.diameter)(length, o.length); }
@@ -56,6 +42,7 @@ struct Tool : ValueType<Tool, 10013, Comparable<Tool, Moveable<Tool>>> {
 	
 	hash_t GetHashValue() const { return CombineHash((int)(type), diameter, length); }
 	
+	Tool(const Nuller&){ diameter = Null; }
 	bool IsNullInstance() const { return IsNull(diameter); }
 	
 	static String typeToString(Type type, bool localize = false) {

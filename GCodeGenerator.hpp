@@ -1,5 +1,5 @@
-#ifndef __GCODE_GENERATOR__
-#define __GCODE_GENERATOR__
+#ifndef _GCODE_GENERATOR_HPP_
+#define _GCODE_GENERATOR_HPP_
 
 #include <Core/Core.h>
 #include "GCodeMach3.hpp"

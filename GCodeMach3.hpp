@@ -1,5 +1,5 @@
-#ifndef _GCODE_MACH3_H_
-#define _GCODE_MACH3_H_
+#ifndef _GCODE_MACH3_HPP_
+#define _GCODE_MACH3_HPP_
 
 #include "GCode.h"
 
