@@ -113,6 +113,18 @@ EasyCncCAM::EasyCncCAM() {
 		}
 	};
 	
+	clOperations.WhenRemove = [=] {
+		int idx = FindOperation(currentOperation);
+		if (idx >= 0) {
+			operations.Remove(idx);
+			delete currentOperation;
+			currentOperation = NULL;
+		}
+		if (operations.GetCount() == 0) {
+			updateOperationTab();
+		}
+	};
+	
 	bRemoveOperation.WhenPush = [=] {
 		int i = clOperations.GetCursor();
 		if (i >= 0) {
@@ -228,47 +240,31 @@ int EasyCncCAM::FindOperation(Operation *op) {
 }
 
 void EasyCncCAM::updateOperationTab() {
+	Operation* newOp = NULL;
 	switch (tOperationSettings.Get()) {
 		case 0: {
-			OperationDrill *op = operationArrayTab.setOperation(currentOperation);
-			if (op) { // transform operation
-				int idx = FindOperation(currentOperation);
-				if (idx >= 0) {
-					operations[idx] = op;
-					clOperations.Set(idx, (int64)op);
-					delete currentOperation;
-					currentOperation = op;
-				}
-			}
+			newOp = operationArrayTab.setOperation(currentOperation);
 			break;
 		}
 		case 1: {
-			OperationDrill *op = operationRoundlessTab.setOperation(currentOperation);
-			if (op) { // transform operation
-				int idx = FindOperation(currentOperation);
-				if (idx >= 0) {
-					operations[idx] = op;
-					clOperations.Set(idx, (int64)op);
-					delete currentOperation;
-					currentOperation = op;
-				}
-			}
+			newOp = operationRoundlessTab.setOperation(currentOperation);
 			break;
 		}
 		case 2: {
-			OperationMilling *op = operationMillingTab.setOperation(currentOperation);
-			if (op) { // transform operation
-				int idx = FindOperation(currentOperation);
-				if (idx >= 0) {
-					operations[idx] = op;
-					clOperations.Set(idx, (int64)op);
-					delete currentOperation;
-					currentOperation = op;
-				}
-			}
+			newOp = operationMillingTab.setOperation(currentOperation);
 			break;
 		}
 	}
+	if (newOp) { // transform operation
+		int idx = FindOperation(currentOperation);
+		if (idx >= 0) {
+			operations[idx] = newOp;
+			clOperations.Set(idx, (int64)newOp);
+			delete currentOperation;
+			currentOperation = newOp;
+		}
+	}
+	tOperationSettings.Enable(currentOperation != NULL);
 	if (Settings::viewerAutoRescale) {
 		viewer.showAllView();
 	} else {

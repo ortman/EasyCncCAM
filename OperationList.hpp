@@ -36,11 +36,13 @@ public:
 			case K_DELETE: {
 				int i = GetCursor();
 				if (i >= 0) {
-					Remove(i);
-					if (GetCursor() == -1 && GetCount() > 0) {
-						SetCursor(GetCount() - 1);
+					if (PromptYesNo(t_("Remove the selected operation?"))) {
+						WhenRemove();
+						Remove(i);
+						if (GetCursor() == -1 && GetCount() > 0) {
+							SetCursor(GetCount() - 1);
+						}
 					}
-					WhenRemove();
 				}
 				return true;
 			}
