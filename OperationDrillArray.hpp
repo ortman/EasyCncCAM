@@ -17,7 +17,7 @@ private:
 	LenType widthType;
 	LenType heightType;
 	
-	void calculate() {
+	void calculate() override {
 		drills.clear();
 		double sx, sy, startX, startY;
 		if (count.cx > 1) {
@@ -73,7 +73,7 @@ public:
 		calculate();
 	}
 	
-	Rectf getRect() {
+	Rectf getRect() override {
 		if (onCenter) {
 			double width2 = (size.cx + tool.diameter) / 2.;
 			double height2 = (size.cy + tool.diameter) / 2.;
@@ -133,42 +133,38 @@ public:
 		heightType = t;
 	}
 	
-	virtual String ToString() {
+	virtual String ToString() override {
 		return String(t_("Drilling")) + "(" + DblStr(tool.diameter) + " x " + DblStr(depth) + ") " + t_("Array:") + " " + count.ToString();
 	}
 	
-	virtual void Draw(ImageDraw& draw, Size& imgSz, Rectf& viewRect, bool isMeasurers = false, bool isDrawDrillCenter = false) {
-		OperationDrill::Draw(draw, imgSz, viewRect, isMeasurers, isDrawDrillCenter);
+	virtual void Draw(DrawPainter &p, Rectf& viewRect, double scale, bool isMeasurers = false, bool isDrawDrillCenter = false) override {
+		OperationDrill::Draw(p, viewRect, scale, isMeasurers, isDrawDrillCenter);
 		if (isMeasurers) {
-			Sizef viewSize = viewRect.GetSize();
-			double scale = min(imgSz.cx / viewSize.cx, imgSz.cy / viewSize.cy);
-			double shiftX = viewRect.left * scale - (imgSz.cx - viewSize.cx * scale) / 2.;
-			double shiftY = viewRect.top * scale - (imgSz.cy - viewSize.cy * scale) / 2.;
-			
-			int xLeft = (int)((center.x - (onCenter ? size.cx / 2. : 0.)) * scale - shiftX);
-			int xRight = xLeft + (int)(size.cx * scale);
-			int yBottom =  imgSz.cy - (int)((center.y - (onCenter ? size.cy / 2. : 0.)) * scale - shiftY);
-			int yTop = yBottom - (int)(size.cy * scale);
+			double xLeft = center.x - (onCenter ? size.cx / 2. : 0.);
+			double xRight = xLeft + size.cx;
+			double yBottom = center.y - (onCenter ? size.cy / 2. : 0.);
+			double yTop = yBottom + size.cy;
 			if (count.cx > 1) {
 				if (count.cy > 1) {
-					draw.DrawPolygon({
-						{xLeft, yTop},
-						{xRight, yTop},
-						{xRight, yBottom},
-						{xLeft, yBottom}},
-						Null, Settings::measurersLineWidth, Settings::measurersColor);
+					p.Move(xLeft,  yTop);
+					p.Line(xRight, yTop);
+					p.Line(xRight, yBottom);
+					p.Line(xLeft,  yBottom);
+					p.Line(xLeft,  yTop);
+					p.Stroke(Settings::measurersLineWidth / scale, Settings::measurersColor);
 				} else {
-					yBottom =  imgSz.cy - (int)(center.y * scale - shiftY);
+					yBottom = center.y;
 				}
-				DrawMeasureLine(draw, xLeft, yBottom, xRight, yBottom, DblStr(size.cx), tool.diameter / 2. * scale + 10. * Settings::subsampling);
+				DrawMeasureLine(p, scale, xLeft, yBottom, xRight, yBottom, DblStr(size.cx), tool.diameter / 2. + 10. / scale);
 			} else {
-				xRight = (int)(center.x * scale - shiftX);
+				xRight = center.x;
 			}
 			if (count.cy > 1) {
-				DrawMeasureLine(draw, xRight, yBottom, xRight, yTop, DblStr(size.cy), tool.diameter / 2. * scale + 10. * Settings::subsampling);
+				DrawMeasureLine(p, scale, xRight, yBottom, xRight, yTop, DblStr(size.cy), tool.diameter / 2. + 10. / scale);
 			}
 		}
 	}
+
 };
 
 class OperationArrayTab : public WithOperationArray<Ctrl> {
