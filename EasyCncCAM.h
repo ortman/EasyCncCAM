@@ -5,20 +5,17 @@
 
 using namespace Upp;
 
+#include "OperationList.hpp"
 #include "ViewerCAM.hpp"
 #include "Resource.h"
 #include "SettingsWindow.hpp"
 #include "ToolEditor.hpp"
 
 class EasyCncCAM : public WithEasyCncCAMLayout<TopWindow> {
-	struct OperationListDisplay : public Display {
-		virtual void Paint(Draw& w, const Rect& r, const Value& q, Color ink, Color paper, dword style) const;
-	};
 private:
 	MenuBar menu;
 	SettingsWindow settingsWindow;
 	FileSel sel;
-	OperationListDisplay operationListDisplay;
 	Operation *currentOperation = NULL;
 	Vector<Operation*> operations;
 	OperationArrayTab operationArrayTab;

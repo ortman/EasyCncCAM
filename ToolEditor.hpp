@@ -1,5 +1,5 @@
-#ifndef _TOOL_EDITOR_H_
-#define _TOOL_EDITOR_H_
+#ifndef _TOOL_EDITOR_HPP_
+#define _TOOL_EDITOR_HPP_
 
 #include "Resource.h"
 #include "Tool.hpp"

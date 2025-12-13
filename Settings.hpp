@@ -1,5 +1,5 @@
-#ifndef _SETTINGS_H_
-#define _SETTINGS_H_
+#ifndef _SETTINGS_HPP_
+#define _SETTINGS_HPP_
 
 #include "Tool.hpp"
 
