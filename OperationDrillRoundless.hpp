@@ -110,16 +110,18 @@ public:
 		if (isMeasurers) {
 			if (sector > 0. && sector < 360.) {
 				double radiusArc = radius / 2.;
-				p.Arc(center, radius, startAngle * M_PI/180., (sector) * M_PI/180.);
-				p.Move(center); p.Line(
-					center.x + radius * cos((sector + startAngle) * M_PI/180.),
-					center.y - radius * sin((-sector - startAngle) * M_PI/180.)
-				);
-				p.Move(center); p.Line(
+				p.Move(center);
+				p.Line(
 					center.x + radius * cos(startAngle * M_PI/180.),
 					center.y - radius * sin(-startAngle * M_PI/180.)
 				);
-				p.Arc(center, radius / 2., startAngle * M_PI/180., (sector) * M_PI/180.);
+				p.Arc(center, radius, startAngle * M_PI/180., (sector) * M_PI/180.);
+				p.Line(center);
+				p.Move(
+					center.x + radiusArc * cos(startAngle * M_PI/180.),
+					center.y - radiusArc * sin(-startAngle * M_PI/180.)
+				);
+				p.Arc(center, radiusArc, startAngle * M_PI/180., (sector) * M_PI/180.);
 				p.Stroke(Settings::measurersLineWidth / scale, Settings::measurersColor);
 				DrawMeasureRadius(p, scale,
 					center.x, center.y,
