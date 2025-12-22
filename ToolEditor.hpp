@@ -57,12 +57,12 @@ public:
 		
 		dlType.Add(Tool::Drill, Tool::typeToString(Tool::Drill, true));
 		dlType.Add(Tool::Mill, Tool::typeToString(Tool::Mill, true));
-		dlType.Add(Tool::Thread, Tool::typeToString(Tool::Thread, true));
+		//dlType.Add(Tool::Thread, Tool::typeToString(Tool::Thread, true));
 		
 		dlSearchType.Add((int)Tool::Other, Tool::typeToString(Tool::Other, true));
 		dlSearchType.Add((int)Tool::Drill, Tool::typeToString(Tool::Drill, true));
 		dlSearchType.Add((int)Tool::Mill, Tool::typeToString(Tool::Mill, true));
-		dlSearchType.Add((int)Tool::Thread, Tool::typeToString(Tool::Thread, true));
+		//dlSearchType.Add((int)Tool::Thread, Tool::typeToString(Tool::Thread, true));
 		dlSearchType = 0;
 		
 		clTools.SetDisplay(toolListDisplay).RowMode().ItemWidth(100).ItemHeight(100);
