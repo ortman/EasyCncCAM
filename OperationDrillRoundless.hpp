@@ -14,6 +14,7 @@ private:
 	int count = 6;
 	double startAngle = 0.;
 	double sector = 360.;
+	bool showAsDiameter = false;
 	
 	void calculate() override {
 		drills.clear();
@@ -51,6 +52,14 @@ public:
 	void setRadius(const double r) {
 		radius = r;
 		calculate();
+	}
+	
+	bool IsShowAsDiameter() {
+		return showAsDiameter;
+	}
+	
+	void SetAsDiameter(bool asDiameter) {
+		showAsDiameter = asDiameter;
 	}
 	
 	int getCount() {
@@ -126,7 +135,7 @@ public:
 				DrawMeasureRadius(p, scale,
 					center.x, center.y,
 					radius,
-					"R" + DblStr(radius),
+					showAsDiameter ? "Ø" + DblStr(radius * 2.) : "R" + DblStr(radius),
 					startAngle + sector / 2.
 				);
 				String textAngle = DblStr(sector) + "°";
@@ -138,7 +147,11 @@ public:
 			} else {
 				p.Circle(center.x, center.y, radius);
 				p.Stroke(Settings::measurersLineWidth / scale, Settings::measurersColor);
-				DrawMeasureRadius(p, scale, center.x, center.y, radius, "R" + DblStr(radius));
+				if (showAsDiameter) {
+					DrawMeasureDiameter(p, scale, center.x, center.y, radius * 2., "Ø" + DblStr(radius * 2.));
+				} else {
+					DrawMeasureRadius(p, scale, center.x, center.y, radius, "R" + DblStr(radius));
+				}
 			}
 		}
 	}
@@ -199,8 +212,10 @@ public:
 		dlRadius.WhenAction = [=] {
 			if (dlRadius.GetData() == ODR_Radius) {
 				eRadius <<= (double)~eRadius / 2.;
+				operation->SetAsDiameter(false);
 			} else {
 				eRadius <<= (double)~eRadius * 2.;
+				operation->SetAsDiameter(true);
 			}
 			eRadius.WhenAction();
 		};
@@ -226,7 +241,6 @@ public:
 	}
 	
 	OperationDrillRoundless* setOperation(Operation *operation) {
-		dlRadius <<= ODR_Radius;
 		if (operation == NULL) {
 			this->operation = NULL;
 			dlTool = -1;
@@ -245,6 +259,7 @@ public:
 			drRoundless = new OperationDrillRoundless(operation);
 		}
 		this->operation = drRoundless;
+		dlRadius <<= drRoundless->IsShowAsDiameter() ? ODR_Diameter : ODR_Radius;
 		dlTool <<= drRoundless->getTool();
 		eDepth <<= drRoundless->getDepth();
 		eCenterShiftX <<= drRoundless->getCenter().x;
