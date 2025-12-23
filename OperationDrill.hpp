@@ -14,15 +14,19 @@ public:
 		const double toolRadius = tool.diameter / 2.;
 		if (tool.type == Tool::Thread) {
 			for (const Pointf& pd : drills) {
-				// TODO
-				//draw.DrawArc({x - radiusScaled, y - radiusScaled, x + radiusScaled, y + radiusScaled}, {x, y - radiusScaled}, {x + radiusScaled, y}, Settings::threadLineWidth, Settings::threadColor);
+				p.Move(
+					pd.x /* + toolRadius * cos(M_PI_2) */,
+					pd.y    - toolRadius * sin(-M_PI_2)
+				);
+				p.Arc(pd, toolRadius, M_PI_2, M_PI_2 * 3.);
 			}
+			p.Stroke(Settings::threadLineWidth / scale, Settings::threadColor);
 		} else {
 			for (const Pointf& pd : drills) {
 				p.Circle(pd.x, pd.y, toolRadius);
 			}
+			p.Stroke(Settings::drillLineWidth / scale, Settings::drillColor);
 		}
-		p.Stroke(Settings::drillLineWidth / scale, Settings::drillColor);
 		if (isDrawDrillCenter && tool.type != Tool::Thread) {
 			double lineLen2 = toolRadius + 5. / scale;
 			for (const Pointf& pd : drills) {
