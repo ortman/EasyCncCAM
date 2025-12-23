@@ -1,15 +1,23 @@
-#ifndef _OPERATION_DRILL_ARRAY_H_
-#define _OPERATION_DRILL_ARRAY_H_
+#ifndef _OPERATION_DRILL_ARRAY_HPP_
+#define _OPERATION_DRILL_ARRAY_HPP_
 
 #include "OperationDrill.hpp"
 
 class OperationDrillArray : public OperationDrill {
+public:
+	typedef enum {
+		LenAll = 1,
+		LenBetween
+	} LenType;
+
+private:
 	Sizef size;
 	Size count;
 	bool onCenter;
+	LenType widthType;
+	LenType heightType;
 	
-private:
-	void calculate() {
+	void calculate() override {
 		drills.clear();
 		double sx, sy, startX, startY;
 		if (count.cx > 1) {
@@ -38,6 +46,8 @@ public:
 		size = {30., 20.};
 		count = {3, 2};
 		onCenter = false;
+		widthType = LenAll;
+		heightType = LenAll;
 		calculate();
 	}
 	
@@ -45,11 +55,15 @@ public:
 		size = {30., 20.};
 		count = {3, 2};
 		onCenter = false;
+		widthType = LenAll;
+		heightType = LenAll;
 		calculate();
 	}
 	
 	OperationDrillArray(Pointf center, Sizef size, Size count) {
 		onCenter = false;
+		widthType = LenAll;
+		heightType = LenAll;
 		setArray(center, size, count);
 	}
 	
@@ -59,7 +73,7 @@ public:
 		calculate();
 	}
 	
-	Rectf getRect() {
+	Rectf getRect() override {
 		if (onCenter) {
 			double width2 = (size.cx + tool.diameter) / 2.;
 			double height2 = (size.cy + tool.diameter) / 2.;
@@ -103,50 +117,63 @@ public:
 		calculate();
 	}
 	
-	virtual String ToString() {
-		return String(tool.type == Tool::Thread ? t_("Threading") : t_("Drilling")) +
-				" (" + DblStr(tool.diameter) + " x " + DblStr(depth) + ") " + t_("Array:") + " " + count.ToString();
+	LenType getWidthType() {
+		return widthType;
 	}
 	
-	virtual void Draw(ImageDraw& draw, Size& imgSz, Rectf& viewRect, bool isMeasurers = false, bool isDrawDrillCenter = false) {
-		OperationDrill::Draw(draw, imgSz, viewRect, isMeasurers, isDrawDrillCenter);
+	void setWidthType(LenType t) {
+		widthType = t;
+	}
+	
+	LenType getHeightType() {
+		return heightType;
+	}
+	
+	void setHeightType(LenType t) {
+		heightType = t;
+	}
+	
+	virtual String ToString() override {
+		return String(tool.type == Tool::Thread ? t_("Threading") : t_("Drilling")) +
+				"(" + DblStr(tool.diameter) + " x " + DblStr(depth) + ") " + t_("Array:") + " " + count.ToString();
+	}
+	
+	virtual void Draw(DrawPainter &p, Rectf& viewRect, double scale, bool isMeasurers = false, bool isDrawDrillCenter = false) override {
+		OperationDrill::Draw(p, viewRect, scale, isMeasurers, isDrawDrillCenter);
 		if (isMeasurers) {
-			Sizef viewSize = viewRect.GetSize();
-			double scale = min(imgSz.cx / viewSize.cx, imgSz.cy / viewSize.cy);
-			double shiftX = viewRect.left * scale - (imgSz.cx - viewSize.cx * scale) / 2.;
-			double shiftY = viewRect.top * scale - (imgSz.cy - viewSize.cy * scale) / 2.;
-			
-			int xLeft = (int)((center.x - (onCenter ? size.cx / 2. : 0.)) * scale - shiftX);
-			int xRight = xLeft + (int)(size.cx * scale);
-			int yBottom =  imgSz.cy - (int)((center.y - (onCenter ? size.cy / 2. : 0.)) * scale - shiftY);
-			int yTop = yBottom - (int)(size.cy * scale);
+			double xLeft = center.x - (onCenter ? size.cx / 2. : 0.);
+			double xRight = xLeft + size.cx;
+			double yBottom = center.y - (onCenter ? size.cy / 2. : 0.);
+			double yTop = yBottom + size.cy;
 			if (count.cx > 1) {
 				if (count.cy > 1) {
-					draw.DrawPolygon({
-						{xLeft, yTop},
-						{xRight, yTop},
-						{xRight, yBottom},
-						{xLeft, yBottom}},
-						Null, Settings::measurersLineWidth, Settings::measurersColor);
+					p.Move(xLeft,  yTop);
+					p.Line(xRight, yTop);
+					p.Line(xRight, yBottom);
+					p.Line(xLeft,  yBottom);
+					p.Line(xLeft,  yTop);
+					p.Stroke(Settings::measurersLineWidth / scale, Settings::measurersColor);
 				} else {
-					yBottom =  imgSz.cy - (int)(center.y * scale - shiftY);
+					yBottom = center.y;
 				}
 				if (tool.type != Tool::Thread) {
-					DrawMeasureLine(draw, xLeft, yBottom, xRight, yBottom, DblStr(size.cx), tool.diameter / 2. * scale + 10. * Settings::subsampling);
+					DrawMeasureLine(p, scale, xLeft, yBottom, xRight, yBottom, DblStr(size.cx), tool.diameter / 2. + 10. / scale);
 				}
 			} else {
-				xRight = (int)(center.x * scale - shiftX);
+				xRight = center.x;
 			}
 			if (count.cy > 1 && tool.type != Tool::Thread) {
-				DrawMeasureLine(draw, xRight, yBottom, xRight, yTop, DblStr(size.cy), tool.diameter / 2. * scale + 10. * Settings::subsampling);
+				DrawMeasureLine(p, scale, xRight, yBottom, xRight, yTop, DblStr(size.cy), tool.diameter / 2. + 10. / scale);
 			}
 		}
 	}
+
 };
 
 class OperationArrayTab : public WithOperationArray<Ctrl> {
 private:
 	OperationDrillArray *operation = NULL;
+	
 public:
 	Event<> WhenPushToolEditor;
 	OperationArrayTab() {
@@ -183,19 +210,69 @@ public:
 				Action();
 			}
 		};
+		dlWidthType.Add({
+			{OperationDrillArray::LenAll, t_("Total width")},
+			{OperationDrillArray::LenBetween, t_("Width between drills")}
+		});
+		dlWidthType.WhenAction = [=] {
+			int t = dlWidthType.GetData();
+			if (operation && t > 0) {
+				OperationDrillArray::LenType type = (OperationDrillArray::LenType)t;
+				OperationDrillArray::LenType currType = operation->getWidthType();
+				if (type != currType) {
+					operation->setWidthType(type);
+					Sizef size = operation->getSize();
+					if (type == OperationDrillArray::LenAll) {
+						operation->setSize({size.cx / (operation->getCount().cx - 1), size.cy});
+					} else {
+						operation->setSize({size.cx * (operation->getCount().cx - 1), size.cy});
+					}
+				}
+			}
+			Action();
+		};
 		eWidth.WhenAction = [=] {
 			double w = eWidth;
 			if (operation && w > 0.) {
 				Sizef size = operation->getSize();
-				operation->setSize({w, size.cy});
+				if (operation->getWidthType() == OperationDrillArray::LenAll) {
+					operation->setSize({w, size.cy});
+				} else {
+					operation->setSize({w * (operation->getCount().cx - 1), size.cy});
+				}
 				Action();
 			}
+		};
+		dlHeightType.Add({
+			{OperationDrillArray::LenAll, t_("Total height")},
+			{OperationDrillArray::LenBetween, t_("Height between drills")}
+		});
+		dlHeightType.WhenAction = [=] {
+			int t = dlHeightType.GetData();
+			if (operation && t > 0) {
+				OperationDrillArray::LenType type = (OperationDrillArray::LenType)t;
+				OperationDrillArray::LenType currType = operation->getHeightType();
+				if (type != currType) {
+					operation->setHeightType(type);
+					Sizef size = operation->getSize();
+					if (type == OperationDrillArray::LenAll) {
+						operation->setSize({size.cx, size.cy / (operation->getCount().cy - 1)});
+					} else {
+						operation->setSize({size.cx, size.cy * (operation->getCount().cy - 1)});
+					}
+				}
+			}
+			Action();
 		};
 		eHeight.WhenAction = [=] {
 			double h = eHeight;
 			if (operation && h > 0.) {
 				Sizef size = operation->getSize();
-				operation->setSize({size.cx, h});
+				if (operation->getWidthType() == OperationDrillArray::LenAll) {
+					operation->setSize({size.cx, h});
+				} else {
+					operation->setSize({size.cx, h * (operation->getCount().cy - 1)});
+				}
 				Action();
 			}
 		};
@@ -204,6 +281,10 @@ public:
 			if (operation && c > 0) {
 				Size count = operation->getCount();
 				operation->setCount({c, count.cy});
+				if (operation->getWidthType() == OperationDrillArray::LenBetween && count.cx > 1 && c > 1) {
+					Sizef s = operation->getSize();
+					operation->setSize({s.cx / (count.cx - 1) * (c - 1), s.cy});
+				}
 				Action();
 			}
 		};
@@ -212,6 +293,10 @@ public:
 			if (operation && c > 0) {
 				Size count = operation->getCount();
 				operation->setCount({count.cx, c});
+				if (operation->getHeightType() == OperationDrillArray::LenBetween && count.cy > 1 && c > 1) {
+					Sizef s = operation->getSize();
+					operation->setSize({s.cx, s.cy / (count.cy - 1) * (c - 1)});
+				}
 				Action();
 			}
 		};
@@ -234,6 +319,8 @@ public:
 			eCountX.Clear();
 			eCountY.Clear();
 			oOnCenter <<= false;
+			dlWidthType <<= OperationDrillArray::LenAll;
+			dlHeightType <<= OperationDrillArray::LenAll;
 			return NULL;
 		}
 		OperationDrillArray *drArray = dynamic_cast<OperationDrillArray*>(operation);
@@ -251,6 +338,8 @@ public:
 		eCountX <<= drArray->getCount().cx;
 		eCountY <<= drArray->getCount().cy;
 		oOnCenter <<= drArray->isOnCenter();
+		dlWidthType <<= drArray->getWidthType();
+		dlHeightType <<= drArray->getHeightType();
 		
 		return isCreateNew ? drArray : NULL;
 	}

@@ -1,5 +1,5 @@
-#ifndef _SETTINGS_WINDOW_H_
-#define _SETTINGS_WINDOW_H_
+#ifndef _SETTINGS_WINDOW_HPP_
+#define _SETTINGS_WINDOW_HPP_
 
 #include "ToolEditor.hpp"
 
@@ -9,14 +9,14 @@ private:
 		eFileExt <<= Settings::fileExt;
 		cViewerBG <<= Settings::viewerBG;
 		cDrillColor <<= Settings::drillColor;
-		eDrillLineWidth <<= round(Settings::drillLineWidth / Settings::subsampling);
+		eThreadLineWidth <<= Settings::threadLineWidth;
 		cThreadColor <<= Settings::threadColor;
-		eThreadLineWidth <<= round(Settings::threadLineWidth / Settings::subsampling);
+		eDrillLineWidth <<= Settings::drillLineWidth;
 		cDrillCenterColor <<= Settings::drillCenterColor;
 		cMeasurersColor <<= Settings::measurersColor;
-		eMeasurersFont <<= round(Settings::measurersFont.GetHeight() / Settings::subsampling);
-		eMeasurersLineWidth <<= round(Settings::measurersLineWidth / Settings::subsampling);
-		eMeasurersArrowSize <<= round(Settings::measurersArrowSize / Settings::subsampling);
+		eMeasurersFont <<= Settings::measurersFont.GetHeight();
+		eMeasurersLineWidth <<= Settings::measurersLineWidth;
+		eMeasurersArrowSize <<= Settings::measurersArrowSize;
 		eMeasurersArrowAngle <<= Settings::measurersArrowAngle * 360. / M_PI;
 		oViewerAutoRescale <<= Settings::viewerAutoRescale;
 	}
@@ -59,7 +59,7 @@ public:
 			WhenAction();
 		};
 		eDrillLineWidth.WhenAction = [=] {
-			Settings::drillLineWidth = (int)((int)~eDrillLineWidth * Settings::subsampling);
+			Settings::drillLineWidth = ~eDrillLineWidth;
 			WhenAction();
 		};
 		cThreadColor.WhenAction = [=] {
@@ -67,7 +67,7 @@ public:
 			WhenAction();
 		};
 		eThreadLineWidth.WhenAction = [=] {
-			Settings::threadLineWidth = (int)((int)~eThreadLineWidth * Settings::subsampling);
+			Settings::threadLineWidth = ~eThreadLineWidth;
 			WhenAction();
 		};
 		cDrillCenterColor.WhenAction = [=] {
@@ -79,15 +79,15 @@ public:
 			WhenAction();
 		};
 		eMeasurersFont.WhenAction = [=] {
-			Settings::measurersFont.Height((int)((int)~eMeasurersFont * Settings::subsampling));
+			Settings::measurersFont.Height(~eMeasurersFont);
 			WhenAction();
 		};
 		eMeasurersLineWidth.WhenAction = [=] {
-			Settings::measurersLineWidth = (int)((int)~eMeasurersLineWidth * Settings::subsampling);
+			Settings::measurersLineWidth = ~eMeasurersLineWidth;
 			WhenAction();
 		};
 		eMeasurersArrowSize.WhenAction = [=] {
-			Settings::measurersArrowSize = (int)((int)~eMeasurersArrowSize * Settings::subsampling);
+			Settings::measurersArrowSize = ~eMeasurersArrowSize;
 			WhenAction();
 		};
 		eMeasurersArrowAngle.WhenAction = [=] {

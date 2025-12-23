@@ -1,5 +1,5 @@
-#ifndef _OPERATION_DRILL_H_
-#define _OPERATION_DRILL_H_
+#ifndef _OPERATION_DRILL_HPP_
+#define _OPERATION_DRILL_HPP_
 
 #include "Operation.hpp"
 
@@ -10,43 +10,32 @@ protected:
 	OperationDrill(){};
 	
 public:
-	virtual void Draw(ImageDraw& draw, Size& imgSz, Rectf& viewRect, bool isMeasurers = false, bool isDrawDrillCenter = false) {
-		Sizef viewSize = viewRect.GetSize();
-		double scale = min(imgSz.cx / viewSize.cx, imgSz.cy / viewSize.cy);
-		double shiftX = viewRect.left * scale - (imgSz.cx - viewSize.cx * scale) / 2.;
-		double shiftY = viewRect.top * scale - (imgSz.cy - viewSize.cy * scale) / 2.;
-		double diameterScaled = tool.diameter * scale;
-		int radiusScaled = (int)(diameterScaled / 2.);
-		int x, y;
-		for (Pointf pd : drills) {
-			x = (int)(pd.x * scale - shiftX);
-			y = imgSz.cy - (int)(pd.y * scale - shiftY);
-			if (viewRect.Contains(pd)) {
-				if (tool.type == Tool::Thread) {
-					draw.DrawArc({x - radiusScaled, y - radiusScaled, x + radiusScaled, y + radiusScaled}, {x, y - radiusScaled}, {x + radiusScaled, y}, Settings::threadLineWidth, Settings::threadColor);
-				} else {
-					draw.DrawEllipse(x - radiusScaled, y - radiusScaled, (int)diameterScaled, (int)diameterScaled, Null, Settings::drillLineWidth, Settings::drillColor);
-				}
+	virtual void Draw(DrawPainter &p, Rectf& viewRect, double scale, bool isMeasurers = false, bool isDrawDrillCenter = false) {
+		const double toolRadius = tool.diameter / 2.;
+		if (tool.type == Tool::Thread) {
+			for (const Pointf& pd : drills) {
+				// TODO
+				//draw.DrawArc({x - radiusScaled, y - radiusScaled, x + radiusScaled, y + radiusScaled}, {x, y - radiusScaled}, {x + radiusScaled, y}, Settings::threadLineWidth, Settings::threadColor);
 			}
-			if (isDrawDrillCenter && tool.type != Tool::Thread) {
-				int radiusDrillCenter = radiusScaled + (int)(5. * Settings::subsampling);
-				draw.DrawLine(
-					x, y - radiusDrillCenter,
-					x, y + radiusDrillCenter,
-					Settings::measurersLineWidth, Settings::drillCenterColor);
-				draw.DrawLine(
-					x - radiusDrillCenter, y,
-					x + radiusDrillCenter, y,
-					Settings::measurersLineWidth, Settings::drillCenterColor);
+		} else {
+			for (const Pointf& pd : drills) {
+				p.Circle(pd.x, pd.y, toolRadius);
 			}
 		}
-		if (isMeasurers) {
-			if (drills.GetCount() > 0) {
-				Pointf &d = drills[0];
-				DrawMeasureDiameter(draw, d.x * scale - shiftX, imgSz.cy - (d.y * scale - shiftY), diameterScaled,
-						(String(tool.type == Tool::Thread ? "M" : "Ø") + DblStr(tool.diameter)),
-						tool.type == Tool::Thread ? -30. : 45.);
+		p.Stroke(Settings::drillLineWidth / scale, Settings::drillColor);
+		if (isDrawDrillCenter && tool.type != Tool::Thread) {
+			double lineLen2 = toolRadius + 5. / scale;
+			for (const Pointf& pd : drills) {
+				p.Move(pd.x, pd.y - lineLen2); p.Line(pd.x, pd.y + lineLen2);
+				p.Move(pd.x - lineLen2, pd.y); p.Line(pd.x + lineLen2, pd.y);
 			}
+			p.Stroke(Settings::measurersLineWidth / scale, Settings::drillCenterColor);
+		}
+		if (isMeasurers && drills.GetCount() > 0) {
+			const Pointf &d = drills[0];
+			DrawMeasureDiameter(p, scale, d.x, d.y, tool.diameter,
+					(String(tool.type == Tool::Thread ? "M" : "Ø") + DblStr(tool.diameter)),
+					tool.type == Tool::Thread ? -30. : 45.);
 		}
 	}
 	

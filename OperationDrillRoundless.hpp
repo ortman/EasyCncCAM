@@ -1,5 +1,5 @@
-#ifndef _OPERATION_DRILL_ROUNDLESS_H_
-#define _OPERATION_DRILL_ROUNDLESS_H_
+#ifndef _OPERATION_DRILL_ROUNDLESS_HPP_
+#define _OPERATION_DRILL_ROUNDLESS_HPP_
 
 #include "OperationDrill.hpp"
 
@@ -15,7 +15,7 @@ private:
 	double startAngle = 0.;
 	double sector = 360.;
 	
-	void calculate() {
+	void calculate() override {
 		drills.clear();
 		double shiftAngle;
 		if (sector < 360. && count > 1) {
@@ -90,7 +90,7 @@ public:
 		calculate();
 	}
 	
-	Rectf getRect() {
+	Rectf getRect() override {
 		double width2 = (radius * 2. + tool.diameter) / 2.;
 		double height2 = (radius * 2. + tool.diameter) / 2.;
 		return {
@@ -101,98 +101,49 @@ public:
 		};
 	}
 	
-	virtual String ToString() {
+	virtual String ToString() override {
 		return String(tool.type == Tool::Thread ? t_("Threading") : t_("Drilling")) +
-				" (" + DblStr(tool.diameter) + " x " + DblStr(depth) + ") " + t_("Radius:") + " " + DblStr(radius) + ", " + t_("Count:") + " " + IntStr(count);
+				"(" + DblStr(tool.diameter) + " x " + DblStr(depth) + ") " + t_("Radius:") + " " + DblStr(radius) + ", " + t_("Count:") + " " + IntStr(count);
 	}
 	
-	virtual void Draw(ImageDraw& draw, Size& imgSz, Rectf& viewRect, bool isMeasurers = false, bool isDrawDrillCenter = false) {
-		OperationDrill::Draw(draw, imgSz, viewRect, isMeasurers, isDrawDrillCenter);
+	virtual void Draw(DrawPainter& p, Rectf& viewRect, double scale, bool isMeasurers = false, bool isDrawDrillCenter = false) override {
+		OperationDrill::Draw(p, viewRect, scale, isMeasurers, isDrawDrillCenter);
 		if (isMeasurers) {
-			Sizef viewSize = viewRect.GetSize();
-			double scale = min(imgSz.cx / viewSize.cx, imgSz.cy / viewSize.cy);
-			double shiftX = viewRect.left * scale - (imgSz.cx - viewSize.cx * scale) / 2.;
-			double shiftY = viewRect.top * scale - (imgSz.cy - viewSize.cy * scale) / 2.;
-			double radiusScale = radius * scale;
-			int diameterScale = (int)(radiusScale * 2.);
 			if (sector > 0. && sector < 360.) {
-				double radiusArc = radiusScale/2.;
-				Pointf c = Pointf(
-					center.x * scale - shiftX,
-					imgSz.cy - (center.y * scale - shiftY)
+				double radiusArc = radius / 2.;
+				p.Move(center);
+				p.Line(
+					center.x + radius * cos(startAngle * M_PI/180.),
+					center.y - radius * sin(-startAngle * M_PI/180.)
 				);
-				draw.DrawArc(RectC(
-						(int)(c.x - radiusArc),
-						(int)(c.y - radiusArc),
-						(int)(radiusArc * 2.),
-						(int)(radiusArc * 2.)
-					),
-					Point(
-						(int)((c.x + radiusArc * cos(startAngle * M_PI/180.))),
-						(int)((c.y + radiusArc * sin(-startAngle * M_PI/180.)))
-					),
-					Point(
-						(int)((c.x + radiusArc * cos((sector + startAngle) * M_PI/180.))),
-						(int)((c.y + radiusArc * sin((-sector - startAngle) * M_PI/180.)))
-					),
-					Settings::measurersLineWidth, Settings::measurersColor
+				p.Arc(center, radius, startAngle * M_PI/180., (sector) * M_PI/180.);
+				p.Line(center);
+				p.Move(
+					center.x + radiusArc * cos(startAngle * M_PI/180.),
+					center.y - radiusArc * sin(-startAngle * M_PI/180.)
 				);
-				
-				draw.DrawLine(
-					(int)(c.x),
-					(int)(c.y),
-					(int)((c.x + radiusScale * cos((sector + startAngle) * M_PI/180.))),
-					(int)((c.y + radiusScale * sin((-sector - startAngle) * M_PI/180.))),
-					Settings::measurersLineWidth, Settings::measurersColor
-				);
-				draw.DrawLine(
-					(int)(c.x),
-					(int)(c.y),
-					(int)((c.x + radiusScale * cos(startAngle * M_PI/180.))),
-					(int)((c.y + radiusScale * sin(-startAngle * M_PI/180.))),
-					Settings::measurersLineWidth, Settings::measurersColor
-				);
-				draw.DrawArc(RectC(
-						(int)(c.x - radiusScale),
-						(int)(c.y - radiusScale),
-						diameterScale,
-						diameterScale
-					),
-					Point(
-						(int)((c.x + radiusScale * cos(startAngle * M_PI/180.))),
-						(int)((c.y + radiusScale * sin(-startAngle * M_PI/180.)))
-					),
-					Point(
-						(int)((c.x + radiusScale * cos((sector + startAngle) * M_PI/180.))),
-						(int)((c.y + radiusScale * sin((-sector - startAngle) * M_PI/180.)))
-					),
-					Settings::measurersLineWidth, Settings::measurersColor
-				);
-				DrawMeasureRadius(draw,
-					center.x * scale - shiftX,
-					imgSz.cy - (center.y * scale - shiftY),
-					radiusScale,
+				p.Arc(center, radiusArc, startAngle * M_PI/180., (sector) * M_PI/180.);
+				p.Stroke(Settings::measurersLineWidth / scale, Settings::measurersColor);
+				DrawMeasureRadius(p, scale,
+					center.x, center.y,
+					radius,
 					"R" + DblStr(radius),
 					startAngle + sector / 2.
 				);
 				String textAngle = DblStr(sector) + "°";
 				Size textAngleSz = GetTextSize(textAngle, Settings::measurersFont);
-				draw.DrawText(
-					(int)((c.x + (radiusArc+20.) * cos((-sector/2. - startAngle) * M_PI/180.)) - textAngleSz.cx/2.),
-					(int)((c.y + (radiusArc+20.) * sin((-sector/2. - startAngle) * M_PI/180.)) - textAngleSz.cy/2.),
-					0, textAngle, Settings::measurersFont, Settings::measurersColor);
-					
+				DrawText(p, scale,
+				         (center.x + (radiusArc + 20./scale) * cos((-sector/2. - startAngle) * M_PI/180.)) - textAngleSz.cx/2./scale,
+				         (center.y - (radiusArc + 20./scale) * sin((-sector/2. - startAngle) * M_PI/180.)) + textAngleSz.cy/2./scale,
+				         0., textAngle, Settings::measurersFont, Settings::measurersColor);
 			} else {
-				draw.DrawEllipse(
-					(int)(center.x * scale - shiftX - radiusScale),
-					(int)(imgSz.cy - (center.y * scale - shiftY + radiusScale)),
-					diameterScale,
-					diameterScale,
-					Null, Settings::measurersLineWidth, Settings::measurersColor);
-				DrawMeasureRadius(draw, center.x * scale - shiftX, imgSz.cy - (center.y * scale - shiftY), radiusScale, "R" + DblStr(radius));
+				p.Circle(center.x, center.y, radius);
+				p.Stroke(Settings::measurersLineWidth / scale, Settings::measurersColor);
+				DrawMeasureRadius(p, scale, center.x, center.y, radius, "R" + DblStr(radius));
 			}
 		}
 	}
+
 };
 
 class OperationRoundlessTab : public WithOperationRoudless<ParentCtrl> {

@@ -1,5 +1,5 @@
-#ifndef _VIEWER_CAM_H_
-#define _VIEWER_CAM_H_
+#ifndef _VIEWER_CAM_HPP_
+#define _VIEWER_CAM_HPP_
 
 #include <Core/Core.h>
 #include "OperationDrillArray.hpp"
@@ -13,25 +13,20 @@ using namespace Upp;
 
 class ViewerCAM : public Ctrl {
 private:
-	Size coordSize = {100, 100};
-	ImageDraw *iDraw = NULL;
-	Size iDrawSize;
+	Sizef coordSize = {100., 100.};
 	Vector<Operation*>* operations = NULL;
 	bool isDrawCoordinates = true;
 	bool isDrawDrillCenter = false;
 	bool isDrawMeasure = true;
-	bool isRedraw = true;
 	Rectf viewRect = {-50., -50., 50., 50.};
 	Point startDrag = {-1, -1};
 	Point shiftDrag = {0, 0};
 	
-	void drawCoordinates(ImageDraw &draw) {
-		Sizef viewSize = viewRect.GetSize();
-		double scale = min(iDrawSize.cx / viewSize.cx, iDrawSize.cy / viewSize.cy);
-		int shiftX = (int)(-viewRect.left * scale + (iDrawSize.cx - viewSize.cx * scale) / 2.);
-		int shiftY = (int)(iDrawSize.cy + viewRect.top * scale - (iDrawSize.cy - viewSize.cy * scale) / 2.);
-		draw.DrawLine(shiftX, shiftY, (int)(shiftX + coordSize.cx * Settings::subsampling), shiftY, Settings::measurersLineWidth * 3, LtRed);
-		draw.DrawLine(shiftX, (int)(shiftY - coordSize.cy * Settings::subsampling), shiftX, shiftY, Settings::measurersLineWidth * 3, LtGreen);
+	void drawCoordinates(DrawPainter &p, double scale) {
+		p.Move(0., 0.); p.Line(coordSize.cx / scale, 0., true);
+		p.Stroke(Settings::measurersLineWidth / scale, Red());
+		p.Move(0., 0.); p.Line(0., coordSize.cy / scale, true);
+		p.Stroke(Settings::measurersLineWidth / scale, Green());
 	}
 	
 public:
@@ -55,35 +50,28 @@ public:
 	
 	void Paint(Draw &w) {
 		Size sz = GetSize();
-		if (iDraw && ((int)(sz.cx * Settings::subsampling) != iDrawSize.cx || (int)(sz.cy * Settings::subsampling) != iDrawSize.cy)) {
-			delete iDraw;
-			iDraw = NULL;
-		}
-		if (iDraw == NULL) {
-			iDrawSize = Size((int)(sz.cx * Settings::subsampling), (int)(sz.cy * Settings::subsampling));
-			iDraw = new ImageDraw(iDrawSize);
-			isRedraw = true;
-		}
-		if (isRedraw) {
-			iDraw->DrawRect(iDrawSize, Settings::viewerBG);
-			if (operations != NULL) {
-				OperationDrill *od;
-				for (Operation* o : *operations) {
-					if (o != NULL) {
-						od = dynamic_cast<OperationDrill*>(o);
-						if (od != NULL) {
-							od->Draw(*iDraw, iDrawSize, viewRect, isDrawMeasure, isDrawDrillCenter);
-						} else {
-							o->Draw(*iDraw, iDrawSize, viewRect, isDrawMeasure);
-						}
+		Sizef viewSize = viewRect.GetSize();
+		DrawPainter p(w, sz);
+		p.Clear(Settings::viewerBG);
+		double scale = min(sz.cx / viewSize.cx, sz.cy / viewSize.cy);
+		Xform2D transform = Xform2D::Translation(shiftDrag.x, shiftDrag.y);
+		transform = Xform2D::Translation(-viewRect.left, -viewRect.bottom) * Xform2D::Scale(scale, -scale) * transform;
+		
+		p.Transform(transform);
+		if (operations != NULL) {
+			OperationDrill *od;
+			for (Operation* o : *operations) {
+				if (o != NULL) {
+					od = dynamic_cast<OperationDrill*>(o);
+					if (od != NULL) {
+						od->Draw(p, viewRect, scale, isDrawMeasure, isDrawDrillCenter);
+					} else {
+						o->Draw(p, viewRect, scale, isDrawMeasure);
 					}
 				}
 			}
-			if (isDrawCoordinates) drawCoordinates(*iDraw);
-			isRedraw = false;
 		}
-		w.DrawRect(sz, Settings::viewerBG);
-		w.DrawImage(shiftDrag.x, shiftDrag.y, sz.cx, sz.cy, *iDraw);
+		if (isDrawCoordinates) drawCoordinates(p, scale);
 	}
 	
 	void setOperations(Vector<Operation*>* o) {
@@ -92,7 +80,7 @@ public:
 	}
 	
 	void MouseWheel(Point p, int zdelta, dword keyflags) {
-		double scale = (zdelta < 0) ? 1.2 : 1./1.2;
+		double scale = (zdelta < 0) ? 1.2 : (1. / 1.2);
 		viewRect = {
 			viewRect.left * scale,
 			viewRect.top * scale,
@@ -104,7 +92,7 @@ public:
 	
 	virtual void LeftDown(Point p, dword keyflags) {
 		startDrag = {p.x, p.y};
-		Image m = Ctrl::OverrideCursor(Image::SizeAll());
+		Ctrl::OverrideCursor(Image::SizeAll());
 	}
 	
   virtual void MouseMove(Point p, dword keyflags) {
@@ -159,11 +147,6 @@ public:
 			viewRect.bottom + cy
 		};
 		Refresh();
-	}
-
-	void Refresh() {
-		isRedraw = true;
-		Ctrl::Refresh();
 	}
 };
 

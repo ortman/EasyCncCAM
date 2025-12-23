@@ -1,5 +1,5 @@
-#ifndef _TOOL_EDITOR_H_
-#define _TOOL_EDITOR_H_
+#ifndef _TOOL_EDITOR_HPP_
+#define _TOOL_EDITOR_HPP_
 
 #include "Resource.h"
 #include "Tool.hpp"
@@ -21,10 +21,13 @@ private:
 			Size toolTyleStringSize = GetTextSize(toolTypeString, StdFont());
 			Font paramsFont = StdFont();
 			paramsFont.Height((int)(paramsFont.GetHeight() * 1.6));
-			w.DrawText(r.left + (r.Width() - toolTyleStringSize.cx) / 2, r.bottom - toolTyleStringSize.cy - paramsFont.GetHeight() - 6, toolTypeString, StdFont(), ink);
+			int txtY = r.top + 30;
+			w.DrawText(r.left + (r.Width() - toolTyleStringSize.cx) / 2, txtY, toolTypeString, StdFont(), ink);
+			txtY += toolTyleStringSize.cy;
 			String toolParams = DblStr(tool.diameter) + " x " + DblStr(tool.length);
 			Size toolParamsSize = GetTextSize(toolParams, paramsFont);
-			w.DrawText(r.left + (r.Width() - toolParamsSize.cx) / 2, r.bottom - toolParamsSize.cy - 3, toolParams, paramsFont, ink);
+			w.DrawText(r.left + (r.Width() - toolParamsSize.cx) / 2, txtY, toolParams, paramsFont, ink);
+			//txtY += paramsFont.GetHeight();
 		}
 		
 		virtual Size GetStdSize(const Value& q) const {
@@ -54,12 +57,12 @@ public:
 		
 		dlType.Add(Tool::Drill, Tool::typeToString(Tool::Drill, true));
 		dlType.Add(Tool::Mill, Tool::typeToString(Tool::Mill, true));
-		dlType.Add(Tool::Thread, Tool::typeToString(Tool::Thread, true));
+		//dlType.Add(Tool::Thread, Tool::typeToString(Tool::Thread, true));
 		
 		dlSearchType.Add((int)-1, t_("Any"));
 		dlSearchType.Add((int)Tool::Drill, Tool::typeToString(Tool::Drill, true));
 		dlSearchType.Add((int)Tool::Mill, Tool::typeToString(Tool::Mill, true));
-		dlSearchType.Add((int)Tool::Thread, Tool::typeToString(Tool::Thread, true));
+		//dlSearchType.Add((int)Tool::Thread, Tool::typeToString(Tool::Thread, true));
 		dlSearchType = 0;
 		
 		clTools.SetDisplay(toolListDisplay).RowMode().ItemWidth(100).ItemHeight(100);
