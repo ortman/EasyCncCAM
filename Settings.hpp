@@ -34,10 +34,7 @@ public:
 			Value v, j = jio.Get();
 			if (!j.IsNull()) {
 				tools.Clear();
-				ValueArray valueTools = j["tools"];
-				for (Tool valueTool: valueTools) {
-					tools.Add(valueTool);
-				}
+				jio("tools", tools);
 				Value viewer = j["viewer"];
 				if (!viewer.IsNull()) {
 					if (!(v = viewer["background"]).IsNull()) {
